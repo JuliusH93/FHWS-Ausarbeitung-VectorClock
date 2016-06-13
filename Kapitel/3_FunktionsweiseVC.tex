@@ -8,12 +8,27 @@ Jeder Node im System besitzt seine eigene Vektoruhr in der Form eines Vektors $V
 \begin{itemize}
 	\item[R1]Jedes mal, wenn ein Node $P_i$ ein Event auslöst, muss dieser seine Vektoruhr für den Eintrag $VC_i$ um Eins hochzählen, es gilt  $VC_i[i] := VC_i[i] + 1$. Dadurch verdeutlicht der Node, dass er etwas getan hat und signalisiert dies den anderen Nodes durch aktualisieren seiner Vektoruhr 
 	\item[R2]Sendet ein Node $P_i$ eine Nachricht $m$, so hängt er seine aktuelle Vektoruhr $VC_i$ an die zu sendende Nachricht an. Auf diese Weise gelangt die Uhr zu dem Empfänger der Nachricht.
-	\item[R3]Empfängt ein Node $P_i$ eine Nachricht, so muss er seine Vektoruhr aktualisieren. Dabei geht er wie folgt vor: $VC_i = \max(VC_i, m.VC)$. Dies bedeutet, dass der Node für jedes Element seiner Vektoruhr überprüft ob der Wert in der Uhr der Nachricht größer als der eigene ist. Sollte dies der Fall sein, wird der eigene Wert an dieser Stelle mit dem Wert aus der anderen Uhr überschrieben.
+	\item[R3]Empfängt ein Node $P_i$ eine Nachricht, so muss er seine Vektoruhr aktualisieren. Dabei geht er wie folgt vor: $VC_i = \max(VC_i, m.VC)$. Dies bedeutet, dass der Node für jedes Element seiner Vektoruhr überprüft ob der Wert in der Uhr der Nachricht größer als der eigene ist. Sollte dies der Fall sein, wird der eigene Wert an dieser Stelle mit dem Wert aus der anderen Uhr überschrieben.\label{R3}
 \end{itemize} \cite{Baldoni:2002:FDC:1435723.1437765}[S. 4]
 
-Die Werte innerhalb einer Vektoruhr $VC_i$ haben eine besondere Bedeutung für den Node $P_i$. $VC_i[i]$ gibt die Anzahl an Events an, welche $P_i$ zu dem Zeitpunkt des Betrachtens verarbeitet hat. Die anderen Werte der Uhr ($VC_i[j]$ mit $j \neq i$) zeigen an, dass alle Events die durch den Node $P_j$ verarbeitet wurden, sich kausal betrachtet in der Vergangenheit von $P_i$ befinden.
+Die Werte innerhalb einer Vektoruhr $VC_i$ haben eine besondere Bedeutung für den Node $P_i$. $VC_i[i]$ gibt die Anzahl an Events an, welche $P_i$ zu dem Zeitpunkt des Betrachtens verarbeitet hat. Die anderen Werte der Uhr ($VC_i[j]$ mit $j \neq i$) zeigen an, dass alle Events die durch den Node $P_j$ verarbeitet wurden, sich kausal betrachtet in der Vergangenheit von $P_i$ befinden. Da jeder Node lediglich seinen Zähler in der Vektoruhr erhöhen darf, hat dieser Node zu jedem Zeitpunkt den aktuellsten Stand seiner lokalen Zeit.
 
-Verdeutlicht wird die Verwaltung der Vektoruhren innerhalb eines Systems mit drei Nodes an dem recht simplen Beispiel X.Y.
+\subsubsection{Vergleich von Vektoruhren untereinander}
+Eine Besonderheit der Vektoruhren besteht im Vergleich von Uhren untereinander. Dies wird notwendig, sobald ein Node eine Nachricht erhält und diese verarbeiten muss. Wie in Bedingung \nameref{R3} zu sehen, muss der Node seine Uhr entsprechen der mitgeschickten Vektoruhr der Nachricht aktualisieren. 
+
+Für zwei zu vergleichende Uhren $VC_1$ und $VC_2$ gibt es folgenden Beziehungen:
+
+\begin{eqnarray}
+&VC_1 \leq VC_2& \text{ wenn } \forall i : VC_1[i] \leq VC_2[i] \\
+	&VC_1 < VC_2& \text{ wenn } VC_1 \leq VC_2 \text{ \& } VC_1 \neq VC_2 \\
+	&VC_1 \mid \mid VC_2& \text{ wenn } !(VC_1 < VC_2) \text{ \& } !(VC_2 < VC_1)
+\end{eqnarray}
+\cite{Mattern88virtualtime}[S. 127, Definition 4]
+
+Fall (1) bedeutet, dass eine Uhr $VC_1$ kleiner oder gleich $VC_2$ ist, wenn jedes Element von $VC_1$ kleiner oder gleich dem entsprechenden Element in $VC_2$ ist. Der zweite Fall (2) liegt vor, wenn Fall (1) zutrifft und zusätzlich kein Element in $VC_1$ gleich dem entsprechenden Element in $VC_2$ ist. 
+Der letzte Fall (3) ist ein Besonderer Fall. Dieser trifft ein, wenn nicht entschieden werden kann, welche Uhr neuer oder älter als die andere ist. Die entsprechenden Nachrichten wurden sozusagen gleichzeitig abgeschickt.
+\subsubsection{Beispiel eines Kommunikation}
+Um die Funktionsweise von Vektoruhren genauer zu beschreiben, wird nun anhand eines einfachen Beispieles die Kommunikation in einem System mit drei Nodes und die verarbeitung der Vektoruhren eines jeden Nodes gezeigt.
 
 \subsection{Effizienten Speicherung der Vektoruhren}
 \subsection{Umsetzung in C\#}
