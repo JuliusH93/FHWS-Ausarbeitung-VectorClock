@@ -1,0 +1,75 @@
+\documentclass[a4paper]{article}
+
+\usepackage{ngerman}
+\usepackage{a4wide}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{amscd}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{bibgerm}
+\usepackage[hidelinks]{hyperref} %add [hidelinks] to hide link boxes
+\usepackage{gensymb}
+\usepackage[section]{placeins}
+\usepackage[export]{adjustbox}
+\usepackage{bm}
+\usepackage{listings}
+
+\hbadness=10000
+\clubpenalty = 10000 % schliesst Schusterjungen aus
+\widowpenalty = 10000 % schliesst Hurenkinder aus
+
+\lstset{
+	 literate={ö}{{\"o}}1 	%Replaces "oe","ae" usw. with \o to use "Umlaute" in listings
+           {ä}{{\"a}}1
+           {ü}{{\"u}}1
+	{ß}{{\ss}}1
+	{Ö}{{\"O}}1
+	{Ä}{{\"A}}1
+           {Ü}{{\"U}}1
+	{ß}{{\ss}}1
+	{=}{$\rightarrow{}$}{1},
+  	breaklines=true,                		% sets automatic line breaking
+	moredelim=[is][\bfseries]{[*}{*]},   	% enable bold style with "[*text*]" in lstlisting
+	columns=flexible
+}
+
+\graphicspath{{./Kapitel/img/}}
+
+%%%
+%%% Style-Definition des Literaturverzeichnis
+%%%
+%%
+
+\bibliographystyle{is-alpha}
+%\bibliographystyle{geralpha}
+ 
+%%\setlength{\parindent}{0pt} %kein Einzug beim Absatzbegin
+\setlength{\parskip}\medskipamount %Abstand zwischen 2 Abs�tzen
+\setcounter{tocdepth}{4} 
+\setcounter{secnumdepth}{4}
+
+\author{Julius Hackel, Markus Bullmann}
+\title{Hausarbeit \\ Ausgewählte Probleme der Verteilten Systeme \\ Vector Clock}
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+Folgende Abschnitte wurden von den entsprechenden Personen verfasst:
+\begin{tabbing}
+Julius Hackel:~~~~~~~~~ \= Text \\
+Markus Bullmann:        \> Text \\
+
+\end{tabbing}
+
+\newpage
+
+\input{Kapitel/Kapitel1.tex}
+
+
+\newpage
+\bibliography{hausarbeit}
+
+\end{document}
