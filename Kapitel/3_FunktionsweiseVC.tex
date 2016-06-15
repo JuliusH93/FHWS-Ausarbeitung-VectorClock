@@ -1,4 +1,6 @@
 \section{Funktionsweise von Vektoruhren}
+
+In diesem Kapitel wird die allgemeine Funktionsweise von Vektoruhren behandelt. Mittels geeigneten Beispielen wird die Kommunikation in einem einfachen verteilten System illustriert, um die Funktionsweise von Vektoruhren innerhalb der Kommunikation zu zeigen. Zuletzt wird auf das System eingegangen, welches im Rahmen dieser Arbeit in der Programmiersprache C\# implementiert wurde.
 \subsection{Prinzipielle Funktionsweise}
 
 Wie bereits beschrieben wurde, bilden Vektoruhren eine Erweiterung der Lamportuhr. Dabei wird in jedem Prozess im System ein Integer als Zähler in der Vektoruhr gespeichert. Im Allgemeinen werden durch eine Vektoruhr Zeitstempel mit Events im System assoziiert \cite{Baldoni:2002:FDC:1435723.1437765}[S. 3].
@@ -74,19 +76,25 @@ Für die Umsetzung dieses Themas wurde C\# als Programmiersprache ausgewählt. D
 
 Die Implementierung wurde in zwei unabhängige Programmteile aufgeteilt. Diese sind ein Commander sowie Nodes. 
 
-TODO: Abbildung des Gesamtsystemes (Commander + 3 Nodes)
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=8cm]{CodeAufbau.pdf}
+	\caption[Aufbau der Anwendung]{Schematischer Aufbau des implementierten verteilten Systems. Jeder Node ist ein eigenständiger Prozess welcher jeweils auf einer eigenen virtuellen Maschine läuft. Der Kommander wird auf einer der VMs ausgeführt und koodiniert die Kommunikation zwischen den Nodes. Dadurch wird die Kommunikation eines verteilten Systems simuliert.}
+	\label{figure:systemaufbau}
+\end{figure}
+\FloatBarrier
 
 Der Commander stellt sozusagen eine übergeordnete Kommandozentrale dar, welche die Kommunikation der Nodes untereinander durch gewisse Steuerbefehle koordiniert. Er besitzt eine grafische Oberfläche, welche mittels WPF erstellt wurde.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=10cm]{commanderWindow.png}
+	\includegraphics[width=8cm]{commanderWindow.png}
 	\caption[Commander Window]{Abbildung des Commanderfensters, welcher dazu dient, die Kommunikation zwischen den Nodes durch Steuerbefehle zu koordinieren}
 	\label{figure:commanderWindow}
 \end{figure}
 \FloatBarrier
 
-Ein Node stellt einen Knoten in dem simulierten System dar. In diesem werden Events ausgeführt und Vektoruhren verarbeitet. Jeder Node besitzt seine eigene, lokale Vektoruhr. Bei einem Node handelt es sich um ein Kommandozeilenprogramm, welches auf einer VM läuft und ständig auf Nachrichten wartet. Damit der Ablauf der Kommunikation besser nachvollzogen werden kann, gibt ein Node bei jedem Event die Details der Nachricht sowie seiner Vektoruhr aus. Zusätzlich sendet er dabei eine Antwort an den Commander mit der Nachricht, welche er erhalten hat und seiner aktuellen lokalen Uhr. Der Commander gibt diese empfangene Antwort in einem Textfenster aus.
+Ein Node stellt einen Prozess in dem simulierten System dar. In diesem werden Events ausgeführt und Vektoruhren verarbeitet. Jeder Node besitzt seine eigene, lokale Vektoruhr. Bei einem Node handelt es sich um ein Kommandozeilenprogramm, welches auf einer VM läuft und ständig auf Nachrichten wartet. Damit der Ablauf der Kommunikation besser nachvollzogen werden kann, gibt ein Node bei jedem Event die Details der Nachricht sowie seiner Vektoruhr aus. Zusätzlich sendet er dabei eine Antwort an den Commander mit der Nachricht, welche er erhalten hat und seiner aktuellen lokalen Uhr. Der Commander gibt diese empfangene Antwort in einem Textfenster aus.
 
 \begin{figure}[ht]
 	\centering
@@ -97,3 +105,5 @@ Ein Node stellt einen Knoten in dem simulierten System dar. In diesem werden Eve
 \FloatBarrier
 
 Die Kommunikation zwischen dem Commander und den Nodes wurde mittels UDP realisiert. Die Entscheidung viel auf UDP, da sich dadurch unnötiger Overhead und Programmieraufwand vermeiden lässt, welcher beispielsweise bei TCP angefallen wäre. Der Aufbau einer Nachricht ist in Abbildung \ref{Nachricht} dargestellt. Beim Absenden der Nachricht, egal ob im Commander oder in den Nodes, wird diese serialisiert und per UPD versendet. Im Empfangsfall muss der empfangene Datenstrom wieder deserialisiert und in eine Nachricht umgewandelt werden. 
+
+TODO: Aufbau einer Nachricht darstellen
