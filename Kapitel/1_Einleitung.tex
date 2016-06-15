@@ -1,6 +1,6 @@
 \section{Einleitung}
 \subsection{Motivation}
-Das Network Time Protocol (NTP) ist eines der Ältesten noch immer verwendete Netzwerkprotokolle.
+Das Network Time Protocol (NTP) ist eines der Ältesten noch immer verwendeten Netzwerkprotokolle \cite{cattini12}.
 NTP wurde 1985 als RFC 958 veröffentlicht und stellt sicher, dass alle Maschinen innerhalb eines Netzwerkes die selbe Zeitkonfiguration besitzen.
 Durch die zentrale Konfiguration und Verteilung der Zeit im Netzwerk wird der Administrationsaufwand deutlich reduziert.
 Der Hauptverwendungszweck für NTP ist jedoch ein Anderer: Nämlich das ständige synchronisieren der aktuellen Zeit auf den Systemen.
@@ -14,8 +14,18 @@ So besitzt ein typischer Anwender heute neben einen klassischen Computer, ein Sm
 Trotzdem sollen seine Daten auf allen Geräten gleichermaßen zugreifbar sein.
 Um diese Anwenderflexibilität zu ermöglichen, werden heute viele Anwendungen als verteilte Systeme entworfen.
 
+Ein solches verteiltes System setzt sich aus mehreren Einzelkomponenten auf unterschiedlichen Rechnern zusammen, die in der Regel nicht über gemeinsamen Speicher verfügen \cite{schill12}.
 Solche verteilte Anwendungen bringen viele neue Herausforderungen mit sich.
+Der nicht vorhandene gemeinsame Speicher führt dazu, dass die Kommunikation zwischen den Prozessen nur über Nachrichten erfolgen kann und in der Regel über das Netzwerk erfolgt. So kann unter Umständen eine vermeintlich einfache Leseoperation zu einer langwierigen Netzwerkanfrage führen.
 
+Zusätzlich ist es nicht mehr ohne weiteres möglich einen globalen Zustand innerhalb eines verteilen Systems zu halten.
+Durch die Verteilung der Prozesse auf unterschiedlichen Computern, sind die Prozesse von einander isoliert. Daraus folgt, dass es nicht einen globalen Zustand geben kann, sondern einen lokalen Zustand pro Prozess. Wird nun so ein lokaler Zustand geändert, muss er auf die restlichen Prozesse repliziert werden. Solang alle Prozesse den selben lokalen Zustand haben, kann von einem globalen Zustand gesprochen werden. Da bei der Kommunikationen Verzögerungen auftreten können, kann jedoch eine Situation entstehen, in der ein Prozess seinen lokalen Zustand mitteilt, bevor ihn die letzte Replikation erreicht, in diesem Fall ist der globale Zustand inkonsistent.
+
+Um dennoch einen globalen Zustand speichern zu können, wie zum Beispiel in einer verteilten Datenbank, müssen die Operationen innerhalb des Systems synchronisiert werden. So kann zum Beispiel gefordert werden, dass alle Operationen in der selben Reihenfolge auf den Replikas ausgeführt wird. Eine Operation kann als Ereignis betrachtet werden, welches zu einem bestimmten Zeitpunkt auftritt. Anhand diesem Zeitpunktes kann darauf geschlossen werden, welche Ereignisse wann eintraten und somit eine definierte Reihenfolge aufweisen.
+
+In verteilten System spielt die absolute Zeit selten eine Rolle, sondern vielmehr die relative Zeit zwischen Ereignissen.
+So ist es für das System unerheblich zu wissen wann genau ein Ereignis eintrat, solange die Reihenfolge der Ereignisse festgestellt werden kann. Unter dieser Voraussetzung können Zähler verwendet werden. Diese Zähler stellen keinen Bezug zu der physikalischen Zeit her, ermöglichen es aber anhand des Zählerstandes zu entscheiden, welche Ereignisse vorausgingen.
+Diese abstrakte Sichtweise von Uhren führt zu dem Begriff logischer Uhren. In dieser Arbeit wird ein Vertreter der logischen Uhren genauer behandelt, nämlich Vektor Uhren.
 
 \subsection{Zielsetzung}
 \subsection{Aufbau}
