@@ -1,9 +1,11 @@
 \documentclass[a4paper]{article}
 
+\usepackage[utf8]{inputenc}
 \usepackage[ngerman]{babel}
+\usepackage[babel,german=quotes]{csquotes}
+\usepackage[backend=biber,maxnames=99,language=german,style=alphabetic,sortcites=true]{biblatex}
 \usepackage{a4wide}
 \usepackage{graphicx}
-\usepackage[utf8]{inputenc}
 \usepackage{amscd}
 \usepackage{amssymb}
 \usepackage{amsmath}
@@ -44,8 +46,11 @@
 %%%
 %%
 
-\bibliographystyle{is-alpha}
+%\bibliographystyle{is-alpha}
 %\bibliographystyle{geralpha}
+\bibliography{hausarbeit}
+\addbibresource{hausarbeit.bib} 
+ 
  
 %%\setlength{\parindent}{0pt} %kein Einzug beim Absatzbegin
 \setlength{\parskip}\medskipamount %Abstand zwischen 2 Abs�tzen
@@ -83,6 +88,6 @@ Julius Hackel:        \> Kapitel 3, 5 und 6 \\
 
 
 \newpage
-\bibliography{hausarbeit}
+\printbibliography
 
 \end{document}
