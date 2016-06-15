@@ -1,3 +1,5 @@
+hausarbeit.pdf
+
 *.aux
 *.lof
 *.log
@@ -9,7 +11,7 @@
 *.dvi
 # *.ps
 # *.eps
-*.pdf
+#*.pdf
 
 *.bbl
 *.bcf
