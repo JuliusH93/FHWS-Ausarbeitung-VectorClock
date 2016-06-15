@@ -14,6 +14,7 @@ Jeder Prozess im System besitzt seine eigene Vektoruhr in der Form eines Vektors
 Die Werte innerhalb einer Vektoruhr $VC_i$ haben eine besondere Bedeutung für den Prozess $P_i$. $VC_i[i]$ gibt die Anzahl an Events an, welche $P_i$ zu dem Zeitpunkt des Betrachtens verarbeitet hat. Die anderen Werte der Uhr ($VC_i[j]$ mit $j \neq i$) zeigen an, dass alle Events welche durch den Prozess $P_j$ verarbeitet wurden, sich kausal betrachtet in der Vergangenheit von $P_i$ befinden. Sie geben sozusagen an, was der Prozess $P_i$ über die Zeiten der anderen Prozesse weiß, diese Information kann sich zu dem Zeitpunkt jedoch bereits von den tatsächlichen Zeiten unterscheiden. Da jeder Prozess lediglich seinen Zähler in der Vektoruhr erhöhen darf, hat dieser Prozess zu jedem Zeitpunkt den aktuellsten Stand seiner lokalen Zeit. \cite{SINGHAL199247}[S. 48]
 
 \subsubsection{Vergleich von Vektoruhren untereinander}
+\label{vergleich}
 Eine Besonderheit der Vektoruhren besteht im Vergleich von Uhren untereinander. Dies wird notwendig, sobald ein Prozess eine Nachricht erhält und diese verarbeiten muss. Wie in Bedingung R3 unter \ref{R3} - \nameref{R3} zu sehen, muss der Prozess seine Uhr entsprechen der mitgeschickten Vektoruhr der Nachricht aktualisieren. Der Vergleich zwischen der eigenen und der empfangenen Uhr muss dann auf Anwendungsebene geschehen, denn dort wird entschieden was mit der angekommenen Nachricht geschieht.
 
 Für zwei zu vergleichende Uhren $VC_1$ und $VC_2$ gibt es folgenden Beziehungen:
@@ -27,13 +28,17 @@ Für zwei zu vergleichende Uhren $VC_1$ und $VC_2$ gibt es folgenden Beziehungen
 
 Fall (1) bedeutet, dass eine Uhr $VC_1$ kleiner oder gleich $VC_2$ ist, wenn jedes Element von $VC_1$ kleiner oder gleich dem entsprechenden Element in $VC_2$ ist. Der zweite Fall (2) liegt vor, wenn Fall (1) zutrifft und zusätzlich kein Element in $VC_1$ gleich dem entsprechenden Element in $VC_2$ ist. 
 Der letzte Fall (3) ist ein Besonderer Fall. Dieser trifft ein wenn nicht entschieden werden kann, welche Uhr neuer oder älter beziehungsweise nach der obigen Definition größer oder kleiner ist als die andere. Die entsprechenden Nachrichten wurden sozusagen gleichzeitig abgeschickt. Dieser im Englischen als \glqq Concurrent\glqq{} bezeichnete Fall stellt ein großes Problem für Systeme dar, die Vektoruhren für die zeitliche Synchronisation der Kommunikation nutzen. Auf diesen Sonderfall wird im nächsten Kapitel genauer eingegangen.
-\subsubsection{Beispiel einer Kommunikation}
-Um die Funktionsweise von Vektoruhren genauer zu beschreiben, wird nun anhand eines einfachen Beispieles die Kommunikation in einem System mit drei Prozessen sowie die Verarbeitung der Vektoruhren eines jeden Prozesses gezeigt.
+
+\subsection{Beispiel einer Kommunikation}
+
+Um die Funktionsweise von Vektoruhren genauer zu beschreiben, wird nun zunächst anhand eines einfachen Beispieles die Kommunikation in einem System mit drei Prozessen sowie die Verarbeitung der Vektoruhren eines jeden Prozesses gezeigt.
+
+\subsubsection{Beispiel einer konfliktfreien Kommunikation}
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=12cm]{KommBeispiel1.pdf}
-	\caption[Beispiel einer Kommunikation]{Ablauf der Kommunikation dreier Prozesse mit Veranschaulichung der dabei auftretenden Vektoruhren}
+	\caption[Beispiel einer konfliktfreien Kommunikation]{Ablauf der Kommunikation dreier Prozesse mit Veranschaulichung der dabei auftretenden Vektoruhren.}
 	Quelle: Nachgezeichnet aus \cite{Baldoni:2002:FDC:1435723.1437765}
 \label{figure:kommBeispiel1}
 \end{figure}
@@ -46,8 +51,23 @@ Nun empfängt Prozess $P_1$ diese Nachricht. Gemäß Regel R1 muss zunächst die
 
 In diesem Beispiel kommen alle Nachrichten passend nacheinander an und es kann zu keinen Konflikten in der Ausführungsreihenfolge kommen. Das Nachfolgende Beispiel verdeutlicht den Fall, dass Gesendete Nachrichten auch von anderen Nachrichten abhängig und während der Übertragung verzögert ankommen können, was ein Problem eines einfachen Systems mit Vektoruhren darstellt.
 
+\subsubsection{Beispiel einer Kommunikation mit Konflikten}
 
+Das zweite Beispiel lässt sich auf ein verteiltes System anwenden, welches ein Bankensystem mit einem Konto und drei unabhängigen Bankautomaten als Prozesse abbildet. Jeder Automat speichert als Daten den aktuellen Kontostand ab. Wird eine Aktion ausgeführt, zum Beispiel eine Ein- oder Auszahlung, so sendet der Automat per Broadcast eine Nachricht mit der Aktualisierung und seiner Vektoruhr an alle anderen Automaten im System.
 
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=12cm]{KommBeispiel2.pdf}
+	\caption[Beispiel einer konfliktbehafteten Kommunikation]{Ablauf der Kommunikation in einem Bankensystem, bei dem durch einen Broadcast ein Konflikt beim Vergleich von Vektoruhren auftritt.}
+	\label{figure:kommBeispiel2}
+\end{figure}
+\FloatBarrier
+
+Zu Beginn werden die Vektoruhren der Prozesse wie im vorherigen Beispiel beschrieben initialisiert. Das erste Event passiert an Prozess 2. Hier wird beispielsweise etwas eingezahlt oder abgehoben, die tatsächliche Aktion spielt für das Beispiel weniger eine Rolle als die Tatsache, dass sich etwas an dem Kontostand geändert hat. Der Prozess $P_2$ schickt nun einen Broadcast mit dem aktualisierten Kontostand und seiner lokalen, ebenfalls aktualisierten Uhr an die übrigen Bankautomaten. Diese empfangen die Nachricht und behandeln sie entsprechend.
+
+Der Konflikt passiert in diesem Beispiel bei den nächsten beiden Events. Zunächst wird an Prozess $P_3$ ein Event ausgelöst. Dieser versucht nun, einen Broadcast an die anderen Automaten zu senden, was jedoch aus technischen Gründen fehlschlägt, so dass die Aktualisierungsnachricht nicht bei den übrigen Prozessen ankommt. Zeitgleich zu diesem Event wird auf Automat $P_1$ der Kontostand aktualisiert. Der Prozess sendet nach der Aktualisierung des Kontos sowie seiner lokalen Uhr den Broadcast. Der eigentliche Konflikt entsteht nun an Prozess $P_3$, denn dessen Änderung am Konto ist nicht in das Event von $P_1$ mit eingeflossen, die beiden Aktionen wurden also Zeitgleich ausgeführt und es kann durch Vergleich der Vektoruhren nicht entschieden werden, welches Event von dem anderen stattgefunden hat. Nach den Regeln für den Vergleich von Vektoruhren in Kapitel \ref{vergleich} entspricht dies dem dritten Fall.
+
+Eine Praktische Bedeutung hätte dies, wenn in $P_3$ bei einem Kontostand von 100 \euro{} ein Betrag von 60 \euro{} abgehoben würde. Werden nun zeitgleich an Automat $P_1$ 80 \euro{} abghoben, so hat der Automat $P_3$ nun seine lokalen Kontostand über 20 \euro{} sowie den empfangenen von 40 \euro{}. Ein solcher Konflikt kann nicht durch die Verwendung von Vektoruhren gelöst werden und muss an eine Anwendungsapi weitergereicht werden.  
 
 \subsection{Umsetzung in C\#}
 Für die Umsetzung dieses Themas wurde C\# als Programmiersprache ausgewählt. Damit die zeitliche Synchronisation mittels Vektoruhren möglichst realitätsnah simuliert werden kann, wurden drei virtuelle Maschinen mit dem Betriebssystem Windows 8.1 aufgesetzt. Diese befinden sich im Hochschulnetzwerk und können per Remote Desktop bedient werden.
