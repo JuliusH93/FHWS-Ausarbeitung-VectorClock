@@ -1,0 +1,23 @@
+\section{Besonderheiten von Vektoruhren}
+
+Nach Betrachtung der Funktionsweise von Vektoruhren sowie einer Beschreibung von besonderen Problemen, gibt es noch weiterführende Aspekte zu beachten. 
+TODO: Mehr text hier! 
+\subsection{Causaly Ordered Multicast}
+
+In einem Verteilten System kann es recht schnell passieren, dass sich die Reihenfolge von gesendeten Broadcasts bei dem Empfänger und dem Sender unterscheiden. Dies führt in gewissen Fällen zu Problemen, wenn z.B. die Daten eines zweiten Broadcast von denen des ersten abhängen, es also eine temporale korrelation gibt. Um diesen Problem zu lösen, haben Kenneth P. Birman und Thomas A. Joseph in \cite{Birman:1987:RCP:7351.7478} den sogenannten Causal Brodacast eingeführt, welcher auch als Causaly Ordered Multicast bezeichnet werden kann.
+
+Wie in \cite{Birman:1987:RCP:7351.7478}[S. 52, Kapitel 3.3] beschrieben, kann es vorkommen, dass sich die Reihenfolge der gesendeten Nachrichten eines Senders und die Reihenfolge der empfangenen Nachrichten am Empfänger unterscheiden. Dies kann etwa durch Verzögerungen auf dem Übertragungsweg geschehen. Bei einem herkömmlichen Broadcast, welcher in einem System mit Vektoruhren abgesendet wird, ist kein Mechanismus vorgesehen um eine eventuell für die Funktionsweise der Anwendung notwendige Reihenfolge der versendeten Nachrichten einzuhalten. Die Broadcast-Nachricht wird einfach an alle Teilnehmer versendet und nicht weiter beachtet.
+
+Anders ist dies bei einem Causaly Orderen Multicast. Wie der Name bereit vermuten lässt, spielt hierbei die Ordnung der Multicasts nach deren Kausalität, also der Ursache eine Rolle. Die Ursache ist in diesem Fall das Verschicken des Broadcast am Sender. Somit werden bei einem Causal Broadcast die Nachrichten nach deren Reihenfolge des Versendens am Senderprozess geordnet. Wichtig ist, dass ein Prozess nach dem Verschicken eines Broadcasts wartet, bis er von jedem Zielprozess des Broadcasts eine Antwort über den Erhalt der Nachricht bekommen hat. Dies setzt voraus, dass die anderen Prozesse in der Nachricht mitgeteilt bekommen, dass sie auf diese Antworten. Dabei haben die Antwortnachrichten keinen Einfluss auf der Uhrenebene, sie dienen lediglich dazu die Reihenfolge bei dem Abschicken mit der Reihenfolge des Empfangs am Zielprozess sicherzustellen.
+
+TODO: Bild das den Ablauf der Broadcasts zeigt
+
+\subsubsection{Umsetzung in C\# auf Basis der Vektoruhr}
+Causaly Ordered Multicasts wurden als Erweiterung der in Kapitel \ref{impl} beschriebenen Implementierung eingefügt. In dem beschriebenen Bank-Szenario sendet ein Bankautomat bereits bei einer Kontoaktualisierung, als einem Event, einen Broadcast an alle im System vorhandenen Prozesse. Dabei ist es jedoch egal ob die gesendeten Nachrichten über die Aktualisierung auch ankommen oder nicht. Dieses System funktioniert solange, bis ein Prozess einmal eine Aktualisierung nicht mitbekommt und somit seinen Kontostand nicht entsprechend aktualisiert. Um diesem Problem entgegenzuwirken, können Causal Broadcasts helfen.
+
+Da die Kommunikation in der Vektoruhr-implementierung auf Basis von UDP gemacht wurde, bekommt der Sender keine automatische Möglichkeit, eine Empfangsbestätigung seiner gesendeten Nachricht zu erhalten.
+
+TODO: Auf TCP und die notwendigkeit der Antwort eingehen.
+
+ 
+\subsection{Rolle der Anwendungsschicht (Anwendungs-API)}
