@@ -35,7 +35,7 @@ Der letzte Fall (3) ist ein Besonderer Fall. Dieser trifft ein wenn nicht entsch
 
 Um die Funktionsweise von Vektoruhren genauer zu beschreiben, wird nun zunächst anhand eines einfachen Beispieles die Kommunikation in einem System mit drei Prozessen sowie die Verarbeitung der Vektoruhren eines jeden Prozesses gezeigt.
 
-\subsubsection{Beispiel einer konfliktfreien Kommunikation}
+\subsubsection{Konfliktfreie Kommunikation}
 
 \begin{figure}[ht]
 	\centering
@@ -53,7 +53,7 @@ Nun empfängt Prozess $P_1$ diese Nachricht. Gemäß Regel R1 muss zunächst die
 
 In diesem Beispiel kommen alle Nachrichten passend nacheinander an und es kann zu keinen Konflikten in der Ausführungsreihenfolge kommen. Das Nachfolgende Beispiel verdeutlicht den Fall, dass Gesendete Nachrichten auch von anderen Nachrichten abhängig und während der Übertragung verzögert ankommen können, was ein Problem eines einfachen Systems mit Vektoruhren darstellt.
 
-\subsubsection{Beispiel einer Kommunikation mit Konflikten}
+\subsubsection{Kommunikation mit Konflikten}
 
 Das zweite Beispiel lässt sich auf ein verteiltes System anwenden, welches ein Bankensystem mit einem Konto und drei unabhängigen Bankautomaten als Prozesse abbildet. Jeder Automat speichert als Daten den aktuellen Kontostand ab. Wird eine Aktion ausgeführt, zum Beispiel eine Ein- oder Auszahlung, so sendet der Automat per Broadcast eine Nachricht mit der Aktualisierung und seiner Vektoruhr an alle anderen Automaten im System.
 
@@ -72,6 +72,7 @@ Der Konflikt passiert in diesem Beispiel bei den nächsten beiden Events. Zunäc
 Eine Praktische Bedeutung hätte dies, wenn in $P_3$ bei einem Kontostand von 100 \euro{} ein Betrag von 60 \euro{} abgehoben würde. Werden nun zeitgleich an Automat $P_1$ 80 \euro{} abghoben, so hat der Automat $P_3$ nun seine lokalen Kontostand über 20 \euro{} sowie den empfangenen von 40 \euro{}. Ein solcher Konflikt kann nicht durch die Verwendung von Vektoruhren gelöst werden und muss an eine Anwendungsapi weitergereicht werden.  
 
 \subsection{Umsetzung in C\#}
+\label{vectorClockImpl}
 Für die Umsetzung dieses Themas wurde C\# als Programmiersprache ausgewählt. Damit die zeitliche Synchronisation mittels Vektoruhren möglichst realitätsnah simuliert werden kann, wurden drei virtuelle Maschinen mit dem Betriebssystem Windows 8.1 aufgesetzt. Diese befinden sich im Hochschulnetzwerk und können per Remote Desktop bedient werden.
 
 Die Implementierung wurde in zwei unabhängige Programmteile aufgeteilt. Diese sind ein Commander sowie Nodes. 
@@ -84,7 +85,7 @@ Die Implementierung wurde in zwei unabhängige Programmteile aufgeteilt. Diese s
 \end{figure}
 \FloatBarrier
 
-Der Commander stellt sozusagen eine übergeordnete Kommandozentrale dar, welche die Kommunikation der Nodes untereinander durch gewisse Steuerbefehle koordiniert. Er besitzt eine grafische Oberfläche, welche mittels WPF erstellt wurde.
+Der Commander stellt sozusagen eine übergeordnete Kommandozentrale dar, welche die Kommunikation der Nodes untereinander durch gewisse Steuerbefehle koordiniert. Er besitzt eine grafische Oberfläche, welche mittels WPF erstellt wurde. Jeder Prozess besitzt in dem Mainwindow des Commanders eine eigene Spalte, in welcher die aktuellen Informationen des Prozesses angezeigt werden. Nach dem Start des Commanders wird zudem überprüft, ob die Prozesse im System erreichbar sind. Dies wird durch einen einfachen Ping an die Netzwerkaddresse der Nodes realisiert. 
 
 \begin{figure}[ht]
 	\centering
@@ -94,7 +95,7 @@ Der Commander stellt sozusagen eine übergeordnete Kommandozentrale dar, welche 
 \end{figure}
 \FloatBarrier
 
-Ein Node stellt einen Prozess in dem simulierten System dar. In diesem werden Events ausgeführt und Vektoruhren verarbeitet. Jeder Node besitzt seine eigene, lokale Vektoruhr. Bei einem Node handelt es sich um ein Kommandozeilenprogramm, welches auf einer VM läuft und ständig auf Nachrichten wartet. Damit der Ablauf der Kommunikation besser nachvollzogen werden kann, gibt ein Node bei jedem Event die Details der Nachricht sowie seiner Vektoruhr aus. Zusätzlich sendet er dabei eine Antwort an den Commander mit der Nachricht, welche er erhalten hat und seiner aktuellen lokalen Uhr. Der Commander gibt diese empfangene Antwort in einem Textfenster aus.
+Ein Node stellt einen Prozess in dem simulierten System dar. In diesem werden Events ausgeführt und Vektoruhren verarbeitet. Jeder Node besitzt seine eigene, lokale Vektoruhr. Bei einem Node handelt es sich um ein Kommandozeilenprogramm, welches auf einer VM läuft und ständig auf Nachrichten wartet. Damit der Ablauf der Kommunikation besser nachvollzogen werden kann, gibt ein Node bei jedem Event die Details der Nachricht sowie seiner Vektoruhr aus. Zusätzlich sendet er dabei eine Antwort an den Commander mit der Nachricht, welche er erhalten hat und seiner aktuellen lokalen Uhr. Der Commander gibt diese empfangene Antwort in einem Textfenster aus und aktualisiert zudem die einzelnen Statusanzeigen im Mainwindow.
 
 \begin{figure}[ht]
 	\centering
@@ -104,6 +105,22 @@ Ein Node stellt einen Prozess in dem simulierten System dar. In diesem werden Ev
 \end{figure}
 \FloatBarrier
 
-Die Kommunikation zwischen dem Commander und den Nodes wurde mittels UDP realisiert. Die Entscheidung viel auf UDP, da sich dadurch unnötiger Overhead und Programmieraufwand vermeiden lässt, welcher beispielsweise bei TCP angefallen wäre. Der Aufbau einer Nachricht ist in Abbildung \ref{Nachricht} dargestellt. Beim Absenden der Nachricht, egal ob im Commander oder in den Nodes, wird diese serialisiert und per UPD versendet. Im Empfangsfall muss der empfangene Datenstrom wieder deserialisiert und in eine Nachricht umgewandelt werden. 
+Die Kommunikation zwischen dem Commander und den Nodes wurde mittels UDP realisiert. Die Entscheidung viel auf UDP, da sich dadurch unnötiger Overhead und Programmieraufwand vermeiden lässt, welcher beispielsweise bei TCP angefallen wäre. Der Aufbau einer Nachricht ist in Abbildung \ref{figure:aufbauNachricht} dargestellt. Generell lässt sich ein Nachrichtenobjekt in drei Bestandteile aufteilen, dem Header, einem Control- sowie einem Communicationblock. 
 
-TODO: Aufbau einer Nachricht darstellen
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=10cm]{AufbauNachricht.pdf}
+	\caption[Aufbau einer Nachricht]{Aufbau einer Nachricht zwischen Commander und den Nodes. Diese besteht aus einem Header zur Addressierung, einem Controlblock für die Kommunikation mit dem Commander sowie einem Communicationblock für die Kommunikation der Nodes untereinander.}
+	\label{figure:aufbauNachricht}
+\end{figure}
+\FloatBarrier
+
+Im Header stehen Messagetype sowie Senderaddress. Diese werden dafür verwendet, die Nachricht zu adressieren und bei Empfang die Art der Verarbeitung festzulegen. Dies kann zum Einen Steuerung oder zum anderen Kommunikation sein.
+
+Der Controlblock beinhaltet den Command, das Balancedelta und das Sendmessagetarget. Durch den Command kann der Commander dem Node einen Steuerbefehl übersenden und ihm so mitteilen, was er zu tun hat. Sollte eine Kontoaktualisierung gewünscht sein, wird der zu ändernde Betrag in Balancedelta eingetragen. Falls ein Node eine Nachricht an einen anderen senden soll, befindet sich die Adresse des Empfängers in der Variable Sendmessagetarget.
+
+Im Falle einer Kommunikationsnachricht kommt der Communicationblock zum tragen. Der wichtigste Bestandteil ist hierbei die Vectoruhr, denn bei jeder Kommunikationsnachricht muss die aktuelle Vektoruhr versendet werden. Neben der Uhr beinhaltet dieser Block noch den Payload. Dabei handelt es sich sozusagen um die \qq{Ladung} der Nachricht. Diese ist im Gegensatz zu der Uhr nur auf der Anwendungsebene interessant. In dem hier beschriebenen Bankenbeispiel beinhaltet der Payload die Balance, also den aktuellen Kontostand der Senderprozesses.
+
+Beim Absenden der Nachricht, egal ob im Commander oder in den Nodes, wird diese serialisiert und per UDP versendet. Im Empfangsfall muss der empfangene Datenstrom wieder deserialisiert und in eine Nachricht umgewandelt werden.
+
+TODO: Näher auf den Code eingehen, auch mit Codebeispielen
