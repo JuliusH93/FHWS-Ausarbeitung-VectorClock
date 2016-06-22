@@ -41,7 +41,7 @@ Im Laufe der Kommunikation kann es passieren, dass mehrere nacheinander empfange
 \subsubsection{Umsetzung in C\# auf Basis der Vektoruhr}
 Causaly Ordered Multicasts wurden als Erweiterung der in Kapitel \ref{vectorClockImpl} beschriebenen Implementierung eingefügt. In dem gewählten Bank-Szenario sendet ein Bankautomat bei jeder Kontoaktualisierung, also einem Event, einen Broadcast an alle im System vorhandenen Prozesse. Dabei ist es jedoch egal ob die gesendeten Nachrichten über die Aktualisierung auch ankommen oder nicht beziehungsweise spielt die Reihenfolge des Empfangs für den Sender keine Rolle. Dieses System funktioniert solange, bis ein Prozess einmal eine Aktualisierung zu spät erhält und somit seinen Kontostand nicht entsprechend zum richtigen Zeitpunkt aktualisiert. Um diesem Problem entgegenzuwirken, können Causal Broadcasts helfen.
 
-Als Grundlage dient die in Kapitel \ref{vectorClockImpl} implementierte Vektoruhren. Jedoch gibt es einige Unterschiede bei der Aktualisierung der Uhren beziehungsweise des Zeitpunkts der Aktualisierung.
+Als Grundlage dient die in Kapitel \ref{vectorClockImpl} implementierte Vektoruhren-Mechanik. Jedoch gibt es einige Unterschiede bei der Aktualisierung der Uhren beziehungsweise des Zeitpunkts der Aktualisierung.
 
 
  
