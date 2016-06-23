@@ -78,7 +78,6 @@ Eine Praktische Bedeutung hätte dies, wenn in $P_3$ bei einem Kontostand von 10
 Für die Umsetzung dieses Themas wurde C\# als Programmiersprache ausgewählt. Damit die zeitliche Synchronisation mittels Vektoruhren möglichst realitätsnah simuliert werden kann, wurden drei virtuelle Maschinen mit dem Betriebssystem Windows 8.1 aufgesetzt. Diese befinden sich im Hochschulnetzwerk und können per Remote Desktop bedient werden. Um die effizienz der Entwicklung zu erhöhen, wurde die Addressierung der Nodes durch IPEndPoints umgesetzt. Dies stellt einen generellen Endpunkt des IP-Protokolls bestehend aus IP-Addresse und einem Port dar. Dadurch konnte das gesamte System zu Testzwecken auch auf nur einem, lokalen Computer ausgeführt und getestet werden.
 
 \subsubsection{Genereller Aufbau des Programms}
-Die Implementierung wurde in zwei unabhängige Programmteile aufgeteilt. Diese sind ein Commander sowie Nodes. Durch diese Unterteilung ergibt sich zudem wie in Abbildung \ref*{figure:systemaufbau} eine logische Aufteilung der Kommunikation im System in eine Kontrollebene sowie eine Kommunikationsebene.
 
 \begin{figure}[ht]
 	\centering
@@ -87,6 +86,8 @@ Die Implementierung wurde in zwei unabhängige Programmteile aufgeteilt. Diese s
 	\label{figure:systemaufbau}
 \end{figure}
 \FloatBarrier
+
+Die Implementierung wurde in zwei unabhängige Programmteile aufgeteilt. Diese sind ein Commander sowie Nodes. Durch diese Unterteilung ergibt sich zudem wie in Abbildung \ref*{figure:systemaufbau} dargestellt eine logische Aufteilung der Kommunikation im System in eine Kontrollebene sowie eine Kommunikationsebene.
 
 Der Commander stellt sozusagen eine übergeordnete Kommandozentrale dar, welche die Kommunikation der Nodes untereinander durch gewisse Steuerbefehle koordiniert. Er besitzt eine grafische Oberfläche, welche mittels WPF erstellt wurde. Jeder Prozess besitzt in dem Mainwindow des Commanders eine eigene Spalte, in welcher die aktuellen Informationen des Prozesses angezeigt werden. Nach dem Start des Commanders wird zudem überprüft, ob die Prozesse im System erreichbar sind. Dies wird durch einen einfachen Ping an die Netzwerkaddresse der Nodes durchgeführt. Der Kommander dient allgemein dazu, die Übersicht über das verteilte System sowie die aktuellen Zustände der Nodes auf den verteilten VMs zu behalten. 
 
@@ -134,6 +135,7 @@ Sowohl der Commander als auch alle Nodes warten ständig während der Ausführun
 
 \begin{lstlisting}[label=lst:nodeWhile,
 language=sharpc,
+float=ht,
 firstnumber=1,
 caption=While-Scheife für das Warten auf neue Nachrichten. Auszug aus dem Node.]
 using (UdpClient client = new UdpClient(port, AddressFamily.InterNetwork))
@@ -155,6 +157,7 @@ Da es sich bei dem Commander um eine WPF-Anwendung handelt, darf hier die eben b
 
 \begin{lstlisting}[label=lst:commanderWhile,
 language=sharpc,
+float=ht,
 firstnumber=1,
 caption=Starten eines neuen Tasks um asynchron auf eventuelle Rückantworten der Nodes zu warten.]
 public MainViewModel()
@@ -175,4 +178,7 @@ Wie in Listing \ref{lst:commanderWhile} zu sehen ist, wird am Ende des MainViewM
 
 TODO
 
+\subsubsection{Verarbeitung von Nachrichten im Node}
+
+TODO
 
