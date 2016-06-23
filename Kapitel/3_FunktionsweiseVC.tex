@@ -5,7 +5,8 @@ In diesem Kapitel wird die allgemeine Funktionsweise von Vektoruhren behandelt. 
 
 Wie bereits beschrieben wurde, bilden Vektoruhren eine Erweiterung der Lamportuhr. Dabei wird in jedem Prozess im System ein Integer als Zähler in der Vektoruhr gespeichert. Im Allgemeinen werden durch eine Vektoruhr Zeitstempel mit Events im System assoziiert \cite{Baldoni:2002:FDC:1435723.1437765}[S. 3].
 
-Jeder Prozess im System besitzt seine eigene Vektoruhr in der Form eines Vektors $VC_i[1...n]$, wobei alle Elemente der Uhr mit $0$ initialisiert werden. Die Uhr eines Prozesses wird wie folgt verwaltet und aktualisiert:
+Jeder Prozess im System besitzt seine eigene Vektoruhr in der Form eines Vektors $VC_i[1...n]$, wobei alle Elemente der Uhr mit $0$ initialisiert werden. Im Laufe der Kommunikation werden durch die verschiedenen, verteilten Prozesse Nachrichten untereinander verschickt. Damit durch den Einsatz von Vektoruhren nachvollzogen werden kann, wie die Zeitlichen Reihenfolge solcher Events aussieht, müssen die entsprechenden Uhren jeweils bei auftreten eines Events angepasst werden.
+Die Uhr eines Prozesses wird wie folgt verwaltet und aktualisiert:
 
 \begin{itemize}
 	\item[R1]Jedes mal, wenn ein Prozess $P_i$ ein Event auslöst, muss dieser seine Vektoruhr für den Eintrag $VC_i$ um Eins hochzählen, es gilt  $VC_i[i] := VC_i[i] + 1$. Dadurch verdeutlicht der Prozess, dass er etwas getan hat und signalisiert dies den anderen Prozessen durch aktualisieren seiner Vektoruhr 
@@ -13,11 +14,13 @@ Jeder Prozess im System besitzt seine eigene Vektoruhr in der Form eines Vektors
 	\item[R3]Empfängt ein Prozess $P_i$ eine Nachricht, so muss er seine Vektoruhr aktualisieren. Dabei geht er wie folgt vor: $VC_i = \max(VC_i, m.VC)$. Dies bedeutet, dass der Prozess für jedes Element seiner Vektoruhr überprüft ob der Wert in der Uhr der Nachricht größer als der eigene ist. Sollte dies der Fall sein, wird der eigene Wert an dieser Stelle mit dem Wert aus der anderen Uhr überschrieben.\label{R3}
 \end{itemize} \cite{Baldoni:2002:FDC:1435723.1437765}[S. 4]
 
-Die Werte innerhalb einer Vektoruhr $VC_i$ haben eine besondere Bedeutung für den Prozess $P_i$. $VC_i[i]$ gibt die Anzahl an Events an, welche $P_i$ zu dem Zeitpunkt des Betrachtens verarbeitet hat. Die anderen Werte der Uhr ($VC_i[j]$ mit $j \neq i$) zeigen an, dass alle Events welche durch den Prozess $P_j$ verarbeitet wurden, sich kausal betrachtet in der Vergangenheit von $P_i$ befinden. Sie geben sozusagen an, was der Prozess $P_i$ über die Zeiten der anderen Prozesse weiß, diese Information kann sich zu dem Zeitpunkt jedoch bereits von den tatsächlichen Zeiten unterscheiden. Da jeder Prozess lediglich seinen Zähler in der Vektoruhr erhöhen darf, hat dieser Prozess zu jedem Zeitpunkt den aktuellsten Stand seiner lokalen Zeit. \cite{SINGHAL199247}[S. 48]
+Die Werte innerhalb einer Vektoruhr $VC_i$ haben eine besondere Bedeutung für den Prozess $P_i$. $VC_i[i]$ gibt die Anzahl an Events an, welche $P_i$ zu dem Zeitpunkt des Betrachtens verarbeitet hat. Die anderen Werte der Uhr ($VC_i[j]$ mit $j \neq i$) zeigen an, dass sich alle Events welche durch den Prozess $P_j$ verarbeitet wurden kausal betrachtet in der Vergangenheit von $P_i$ befinden. Sie geben sozusagen an, was der Prozess $P_i$ über die Zeiten der anderen Prozesse weiß, diese Information kann sich zu dem Zeitpunkt jedoch bereits von den tatsächlichen Zeiten in den jeweiligen Prozessen unterscheiden. Da jeder Prozess lediglich seinen Zähler in der Vektoruhr erhöhen darf, hat dieser zu jedem Zeitpunkt den aktuellsten Stand seiner lokalen Zeit. \cite{SINGHAL199247}[S. 48]
 
 \subsubsection{Vergleich von Vektoruhren untereinander}
 \label{vergleich}
-Eine Besonderheit der Vektoruhren besteht im Vergleich von Uhren untereinander. Dies wird notwendig, sobald ein Prozess eine Nachricht erhält und diese verarbeiten muss. Wie in Bedingung R3 unter \ref{R3} - \nameref{R3} zu sehen, muss der Prozess seine Uhr entsprechen der mitgeschickten Vektoruhr der Nachricht aktualisieren. Der Vergleich zwischen der eigenen und der empfangenen Uhr muss dann auf Anwendungsebene geschehen, denn dort wird entschieden was mit der angekommenen Nachricht geschieht.
+Eine Besonderheit der Vektoruhren besteht im Vergleich von Uhren untereinander. Dies wird notwendig, sobald ein Prozess eine Nachricht erhält und diese verarbeiten muss. Verarbeiten bedeutet im Kontext von Vektoruhren, dass die empfangene Nachricht an eine Anwendungsschicht weitergegeben wird. Warum dies notwendig ist, wird in Kapitel \ref{RolleDerAnwendung} genauer erläutert.
+
+Wie in Bedingung R3 unter \ref{R3} - \nameref{R3} zu sehen, muss der Prozess seine Uhr entsprechen der mitgeschickten Vektoruhr der Nachricht aktualisieren. Der Vergleich zwischen der eigenen und der empfangenen Uhr muss dann auf Anwendungsebene geschehen, denn dort wird entschieden was mit der angekommenen Nachricht geschieht.
 
 Für zwei zu vergleichende Uhren $VC_1$ und $VC_2$ gibt es folgenden Beziehungen:
 
@@ -33,29 +36,28 @@ Der letzte Fall (3) ist ein Besonderer Fall. Dieser trifft ein wenn nicht entsch
 
 \subsection{Beispiel einer Kommunikation}
 
-Um die Funktionsweise von Vektoruhren genauer zu beschreiben, wird nun zunächst anhand eines einfachen Beispieles die Kommunikation in einem System mit drei Prozessen sowie die Verarbeitung der Vektoruhren eines jeden Prozesses gezeigt.
+Um die Funktionsweise von Vektoruhren genauer zu beschreiben, wird nun zunächst anhand zweier einfacher Beispiele die Kommunikation in einem System mit drei Prozessen sowie die Verarbeitung der Vektoruhren eines jeden Prozesses gezeigt. Das erste Beispiel behandelt eine Kommunikation die konfliktfrei abläuft und in der die drei Prozesse des verteilten Systems einzelne Nachrichten an beliebige anderen Prozesse senden. In dem zweiten Beispiel wird eine konfliktbehaftete Kommunikation illustriert, bei der durch abgesendete und ungeordnete Broadcasts Statusaktualisierungen mitgeteilt werden.
 
 \subsubsection{Konfliktfreie Kommunikation}
+Am Anfang weiß jeder Prozess nur seine lokale Zeit, der Wert $VC_i$ für Prozess $P_i$ wird deshalb auf $0$ gesetzt. Da der Prozess noch keine Kenntnis über die anderen Teilnehmer im System hat, werden die anderen Einträge mit \qq{$-$} initialisiert.
+
+Zu Beginn sendet in dem in Abbildung \ref{figure:kommBeispiel1} abgebildeten Beispiel Prozess $P_3$ eine Nachricht an $P_1$. Er erzeugt dabei ein Event und muss deshalb zunächst seine lokale Vektoruhr inkrementieren, der Wert $VC_3[3]$ wird also um $1$ erhöht. Die Uhr hat nun den Wert \vc{-}{-}{1}. Anschließend wird die lokale Uhr an die zu sendende Nachricht angehängt und diese verschickt.
+Nun empfängt Prozess $P_1$ diese Nachricht. Gemäß Regel R1 muss zunächst die lokale Uhr entsprechend der mitgeschickten Uhr aktualisiert werden. Da in jedem Feld der Uhr das Maximum genommen wird, wird die lokale Uhr von $P_1$ nach der Aktualisierung von \vc{0}{-}{-} auf \vc{1}{-}{1} geändert. Da das Empfangen einer Nachricht auch als Event angesehen wird, erhöht sich auch der Wert für den lokalen Zähler von $P_1$ innerhalb der Uhr um $1$.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=12cm]{KommBeispiel1.pdf}
 	\caption[Beispiel einer konfliktfreien Kommunikation]{Ablauf der Kommunikation dreier Prozesse mit Veranschaulichung der dabei auftretenden Vektoruhren.}
 	Quelle: Nachgezeichnet aus \cite{Baldoni:2002:FDC:1435723.1437765}
-\label{figure:kommBeispiel1}
+	\label{figure:kommBeispiel1}
 \end{figure}
 \FloatBarrier
-
-Zu Beginn weiß jeder Prozess nur seine lokale Zeit, der Wert $VC_i$ für Prozess $P_i$ wird deshalb auf $0$ gesetzt. Da der Prozess noch keine Kenntnis über die anderen Teilnehmer im System hat, werden die anderen Einträge mit \qq{$-$} initialisiert.
-
-Zu Beginn sendet in dem in Abbildung \ref{figure:kommBeispiel1} abgebildeten Beispiel Prozess $P_3$ eine Nachricht an $P_1$. Er erzeugt dabei ein Event und muss deshalb zunächst seine lokale Vektoruhr inkrementieren, der Wert $VC_3[3]$ wird also um $1$ erhöht. Die Uhr hat nun den Wert \vc{-}{-}{1}. Anschließend wird die lokale Uhr an die zu sendende Nachricht angehängt und diese verschickt.
-Nun empfängt Prozess $P_1$ diese Nachricht. Gemäß Regel R1 muss zunächst die lokale Uhr entsprechend der mitgeschickten Uhr aktualisiert werden. Da in jedem Feld der Uhr das Maximum genommen wird, wird die lokale Uhr von $P_1$ nach der Aktualisierung von \vc{0}{-}{-} auf \vc{1}{-}{1} geändert. Da das Empfangen einer Nachricht auch als Event angesehen wird, erhöht sich auch der Wert für den lokalen Zähler von $P_1$ innerhalb der Uhr um $1$.
 
 In diesem Beispiel kommen alle Nachrichten passend nacheinander an und es kann zu keinen Konflikten in der Ausführungsreihenfolge kommen. Das Nachfolgende Beispiel verdeutlicht den Fall, dass Gesendete Nachrichten auch von anderen Nachrichten abhängig und während der Übertragung verzögert ankommen können, was ein Problem eines einfachen Systems mit Vektoruhren darstellt.
 
 \subsubsection{Kommunikation mit Konflikten}
 
-Das zweite Beispiel lässt sich auf ein verteiltes System anwenden, welches ein Bankensystem mit einem Konto und drei unabhängigen Bankautomaten als Prozesse abbildet. Jeder Automat speichert als Daten den aktuellen Kontostand ab. Wird eine Aktion ausgeführt, zum Beispiel eine Ein- oder Auszahlung, so sendet der Automat per Broadcast eine Nachricht mit der Aktualisierung und seiner Vektoruhr an alle anderen Automaten im System.
+Das zweite Beispiel lässt sich auf ein verteiltes System anwenden, welches ein Bankensystem mit einem Konto und drei unabhängigen Bankautomaten als Prozesse abbildet. Jeder Automat speichert als Information den aktuellen Kontostand ab. Wird eine Aktion beziehungsweise ein Event ausgeführt, zum Beispiel eine Ein- oder Auszahlung, so sendet der Automat per Broadcast eine Nachricht mit der Aktualisierung und seiner Vektoruhr an alle anderen Automaten im System.
 
 \begin{figure}[ht]
 	\centering
@@ -65,17 +67,18 @@ Das zweite Beispiel lässt sich auf ein verteiltes System anwenden, welches ein 
 \end{figure}
 \FloatBarrier
 
-Zu Beginn werden die Vektoruhren der Prozesse wie im vorherigen Beispiel beschrieben initialisiert. Das erste Event passiert an Prozess 2. Hier wird beispielsweise etwas eingezahlt oder abgehoben, die tatsächliche Aktion spielt für das Beispiel weniger eine Rolle als die Tatsache, dass sich etwas an dem Kontostand geändert hat. Der Prozess $P_2$ schickt nun einen Broadcast mit dem aktualisierten Kontostand und seiner lokalen, ebenfalls aktualisierten Uhr an die übrigen Bankautomaten. Diese empfangen die Nachricht und behandeln sie entsprechend.
+Zu Beginn werden die Vektoruhren der Prozesse wie im vorherigen Beispiel beschrieben initialisiert. Das erste Event passiert an Prozess 2. Hier wird beispielsweise etwas eingezahlt oder abgehoben, die tatsächliche Aktion spielt für das Beispiel weniger eine Rolle als die Tatsache, dass sich der Kontostand geändert hat, was zu einem Event im System führt. Der Prozess $P_2$ schickt nun einen Broadcast mit dem aktualisierten Kontostand und seiner lokalen, ebenfalls aktualisierten Uhr an die übrigen Bankautomaten. Diese empfangen die Nachricht und behandeln sie entsprechend.
 
-Der Konflikt passiert in diesem Beispiel bei den nächsten beiden Events. Zunächst wird an Prozess $P_3$ ein Event ausgelöst. Dieser versucht nun, einen Broadcast an die anderen Automaten zu senden, was jedoch aus technischen Gründen fehlschlägt, so dass die Aktualisierungsnachricht nicht bei den übrigen Prozessen ankommt. Zeitgleich zu diesem Event wird auf Automat $P_1$ der Kontostand aktualisiert. Der Prozess sendet nach der Aktualisierung des Kontos sowie seiner lokalen Uhr den Broadcast. Der eigentliche Konflikt entsteht nun an Prozess $P_3$, denn dessen Änderung am Konto ist nicht in das Event von $P_1$ mit eingeflossen, die beiden Aktionen wurden also Zeitgleich ausgeführt und es kann durch Vergleich der Vektoruhren nicht entschieden werden, welches Event von dem anderen stattgefunden hat. Nach den Regeln für den Vergleich von Vektoruhren in Kapitel \ref{vergleich} entspricht dies dem dritten Fall.
+Der Konflikt passiert in diesem Beispiel bei den nächsten beiden Events. Zunächst wird an Prozess $P_3$ ein Event ausgelöst. Dieser versucht nun, einen Broadcast an die anderen Automaten zu senden, was jedoch aus technischen Gründen fehlschlägt, so dass die Aktualisierungsnachricht nicht bei den übrigen Prozessen ankommt. Zeitgleich zu diesem Event wird auf Automat $P_1$ der Kontostand aktualisiert. Der Zeitpunkt \qq{Zeitgleich} bedeutet hier jedoch nicht zwangsweise, dass die Events tatsächlich zu der gleichen, physikalischen Zeit passiert sind, sondern lediglich im Sinne der Reihenfolge von auftretenden Events. Der Prozess sendet nach der Aktualisierung des Kontos sowie seiner lokalen Uhr den Broadcast. Der eigentliche Konflikt entsteht nun an Prozess $P_3$, denn dessen Änderung am Konto ist nicht in das Event von $P_1$ mit eingeflossen, die beiden Aktionen wurden also parallel ausgeführt und es kann durch Vergleich der Vektoruhren nicht entschieden werden, welches Event vor dem anderen stattgefunden hat. Nach den Regeln für den Vergleich von Vektoruhren in Kapitel \ref{vergleich} entspricht dies dem dritten Fall.
 
-Eine Praktische Bedeutung hätte dies, wenn in $P_3$ bei einem Kontostand von 100 \euro{} ein Betrag von 60 \euro{} abgehoben würde. Werden nun zeitgleich an Automat $P_1$ 80 \euro{} abghoben, so hat der Automat $P_3$ nun seine lokalen Kontostand über 20 \euro{} sowie den empfangenen von 40 \euro{}. Ein solcher Konflikt kann nicht durch die Verwendung von Vektoruhren gelöst werden und muss an eine Anwendungsapi weitergereicht werden.  
+Eine Praktische Bedeutung hätte dies, wenn in $P_3$ bei einem Kontostand von 100 \euro{} der Betrag 60 \euro{} abgehoben würde. Werden nun zeitgleich an Automat $P_1$ 80 \euro{} abghoben, so hat der Automat $P_3$ nun seine lokalen Kontostand über 20 \euro{} sowie den empfangenen von 40 \euro{}. Ein solcher Konflikt kann und darf nicht auf der Ebenen der Vektoruhren gelöst werden. Er muss an eine Anwendungs-API weitergereicht werden, was in Kapitel \ref{RolleDerAnwendung} genauer erläutert wird.  
 
 \subsection{Umsetzung in C\#}
 \label{vectorClockImpl}
-Für die Umsetzung dieses Themas wurde C\# als Programmiersprache ausgewählt. Damit die zeitliche Synchronisation mittels Vektoruhren möglichst realitätsnah simuliert werden kann, wurden drei virtuelle Maschinen mit dem Betriebssystem Windows 8.1 aufgesetzt. Diese befinden sich im Hochschulnetzwerk und können per Remote Desktop bedient werden.
+Für die Umsetzung dieses Themas wurde C\# als Programmiersprache ausgewählt. Damit die zeitliche Synchronisation mittels Vektoruhren möglichst realitätsnah simuliert werden kann, wurden drei virtuelle Maschinen mit dem Betriebssystem Windows 8.1 aufgesetzt. Diese befinden sich im Hochschulnetzwerk und können per Remote Desktop bedient werden. Um die effizienz der Entwicklung zu erhöhen, wurde die Addressierung der Nodes durch IPEndPoints umgesetzt. Dies stellt einen generellen Endpunkt des IP-Protokolls bestehend aus IP-Addresse und einem Port dar. Dadurch konnte das gesamte System zu Testzwecken auch auf nur einem, lokalen Computer ausgeführt und getestet werden.
 
-Die Implementierung wurde in zwei unabhängige Programmteile aufgeteilt. Diese sind ein Commander sowie Nodes. 
+\subsubsection{Genereller Aufbau des Programms}
+Die Implementierung wurde in zwei unabhängige Programmteile aufgeteilt. Diese sind ein Commander sowie Nodes. Durch diese Unterteilung ergibt sich zudem wie in Abbildung \ref*{figure:systemaufbau} eine logische Aufteilung der Kommunikation im System in eine Kontrollebene sowie eine Kommunikationsebene.
 
 \begin{figure}[ht]
 	\centering
@@ -85,7 +88,7 @@ Die Implementierung wurde in zwei unabhängige Programmteile aufgeteilt. Diese s
 \end{figure}
 \FloatBarrier
 
-Der Commander stellt sozusagen eine übergeordnete Kommandozentrale dar, welche die Kommunikation der Nodes untereinander durch gewisse Steuerbefehle koordiniert. Er besitzt eine grafische Oberfläche, welche mittels WPF erstellt wurde. Jeder Prozess besitzt in dem Mainwindow des Commanders eine eigene Spalte, in welcher die aktuellen Informationen des Prozesses angezeigt werden. Nach dem Start des Commanders wird zudem überprüft, ob die Prozesse im System erreichbar sind. Dies wird durch einen einfachen Ping an die Netzwerkaddresse der Nodes realisiert. 
+Der Commander stellt sozusagen eine übergeordnete Kommandozentrale dar, welche die Kommunikation der Nodes untereinander durch gewisse Steuerbefehle koordiniert. Er besitzt eine grafische Oberfläche, welche mittels WPF erstellt wurde. Jeder Prozess besitzt in dem Mainwindow des Commanders eine eigene Spalte, in welcher die aktuellen Informationen des Prozesses angezeigt werden. Nach dem Start des Commanders wird zudem überprüft, ob die Prozesse im System erreichbar sind. Dies wird durch einen einfachen Ping an die Netzwerkaddresse der Nodes durchgeführt. Der Kommander dient allgemein dazu, die Übersicht über das verteilte System sowie die aktuellen Zustände der Nodes auf den verteilten VMs zu behalten. 
 
 \begin{figure}[ht]
 	\centering
@@ -95,7 +98,7 @@ Der Commander stellt sozusagen eine übergeordnete Kommandozentrale dar, welche 
 \end{figure}
 \FloatBarrier
 
-Ein Node stellt einen Prozess in dem simulierten System dar. In diesem werden Events ausgeführt und Vektoruhren verarbeitet. Jeder Node besitzt seine eigene, lokale Vektoruhr. Bei einem Node handelt es sich um ein Kommandozeilenprogramm, welches auf einer VM läuft und ständig auf Nachrichten wartet. Damit der Ablauf der Kommunikation besser nachvollzogen werden kann, gibt ein Node bei jedem Event die Details der Nachricht sowie seiner Vektoruhr aus. Zusätzlich sendet er dabei eine Antwort an den Commander mit der Nachricht, welche er erhalten hat und seiner aktuellen lokalen Uhr. Der Commander gibt diese empfangene Antwort in einem Textfenster aus und aktualisiert zudem die einzelnen Statusanzeigen im Mainwindow.
+Ein Node stellt einen Prozess in dem simulierten System dar. In diesem werden Events ausgeführt und Vektoruhren verarbeitet. Jeder Node besitzt seine eigene, lokale Vektoruhr. Bei einem Node handelt es sich um ein Kommandozeilenprogramm, welches auf einer VM läuft und ständig auf Nachrichten wartet. Damit der Ablauf der Kommunikation besser nachvollzogen werden kann, gibt ein Node bei jedem Event die Details der Nachricht sowie seiner Vektoruhr aus. Zusätzlich sendet er dabei eine Antwort an den Commander mit der Nachricht, welche er erhalten hat sowie seiner aktuellen lokalen Uhr. Der Commander gibt diese empfangene Antwort in einem Textfenster aus und aktualisiert zudem die einzelnen Statusanzeigen im Mainwindow.
 
 \begin{figure}[ht]
 	\centering
@@ -105,7 +108,10 @@ Ein Node stellt einen Prozess in dem simulierten System dar. In diesem werden Ev
 \end{figure}
 \FloatBarrier
 
-Die Kommunikation zwischen dem Commander und den Nodes wurde mittels UDP realisiert. Die Entscheidung viel auf UDP, da sich dadurch unnötiger Overhead und Programmieraufwand vermeiden lässt, welcher beispielsweise bei TCP angefallen wäre. Der Aufbau einer Nachricht ist in Abbildung \ref{figure:aufbauNachricht} dargestellt. Generell lässt sich ein Nachrichtenobjekt in drei Bestandteile aufteilen, dem Header, einem Control- sowie einem Communicationblock. 
+Die Kommunikation zwischen dem Commander und den Nodes wurde mittels UDP realisiert. Die Entscheidung viel auf UDP, da sich dadurch unnötiger Overhead und Programmieraufwand vermeiden lässt, welcher beispielsweise bei TCP angefallen wäre. Der Unterschied liegt hierbei in Art der Verbindung. UPD ist ein Verbindungsloses Protocoll bei dem Nachrichten nur an einen Empfänger verschickt werden und dieser nicht darauf antwortet. Bei TCP hingegen muss vor der eigentlichen Kommunikation ein Verbindungsaufbau stattfinden, was zwangsweise in erhöhtem Overhead resultiert. \cite*{Markert2013}.
+
+\subsubsection{Nachrichtenaufbau}
+Der Aufbau einer Nachricht ist in Abbildung \ref{figure:aufbauNachricht} dargestellt. Generell lässt sich ein Nachrichtenobjekt in drei Bestandteile aufteilen. Diese sind ein Header, ein Control- sowie Communicationblock. 
 
 \begin{figure}[ht]
 	\centering
@@ -123,4 +129,50 @@ Im Falle einer Kommunikationsnachricht kommt der Communicationblock zum tragen. 
 
 Beim Absenden der Nachricht, egal ob im Commander oder in den Nodes, wird diese serialisiert und per UDP versendet. Im Empfangsfall muss der empfangene Datenstrom wieder deserialisiert und in eine Nachricht umgewandelt werden.
 
-TODO: Näher auf den Code eingehen, auch mit Codebeispielen
+\subsubsection{Empfang von Nachrichten}
+Sowohl der Commander als auch alle Nodes warten ständig während der Ausführung auf ankommende Nachrichten. Dies wurde im Code durch eine While-Schleife implementiert.
+
+\begin{lstlisting}[label=lst:nodeWhile,
+language=sharpc,
+firstnumber=1,
+caption=While-Scheife für das Warten auf neue Nachrichten. Auszug aus dem Node.]
+using (UdpClient client = new UdpClient(port, AddressFamily.InterNetwork))
+{
+	while (true)
+	{
+		IPEndPoint remoteEP = null;
+		byte[] data = client.Receive(ref remoteEP);
+
+		Message msg = MessageDeserializer.Deserialize(data);
+		controlLogic.HandleMessage(causallyOrderedMode, msg, remoteEP);
+	}
+}
+\end{lstlisting}
+
+Die in Listing \ref{lst:nodeWhile} dargestellte While-Scheilfe stammt aus dem Node-Teil des Programms. Hier kann die Schleife direkt in der Main-Methode ausgeführt werden, da die einzige Aufgabe des Nodes das Warten auf ankommende Nachrichten ist. Sobald eine Nachricht empfangen wurde, wird die Methode \code{client.Receive} ausgelöst. Diese Methode wartet sonst so lange, bis etwas empfangen wird. Anschließend kann die Nachricht aus dem ankommenden Bytestrom deserialisiert und durch den Aufruf \code{controlLogic.HandleMessage()} an die Kontrollebene zur weiteren Verarbeitung übergeben werden. Auf dieser Ebene wird dann entschieden, ob die Nachricht eine Kontroll- oder eine Kommunikationsnachricht ist und anschließend entsprechend gehandelt.
+
+Da es sich bei dem Commander um eine WPF-Anwendung handelt, darf hier die eben beschriebene Schleife das Programm nicht blockieren. Aus diesem Grund wird was Warten auf Antworten der Node im Commander in einem Task ausgeführt.
+
+\begin{lstlisting}[label=lst:commanderWhile,
+language=sharpc,
+firstnumber=1,
+caption=Starten eines neuen Tasks um asynchron auf eventuelle Rückantworten der Nodes zu warten.]
+public MainViewModel()
+{
+	Node1 = new NodeViewModel("mjverteil01", new IPEndPoint(IPAddress.Loopback, 1337));
+	Node2 = new NodeViewModel("mjverteil02", new IPEndPoint(IPAddress.Loopback, 1338));
+	Node3 = new NodeViewModel("mjverteil03", new IPEndPoint(IPAddress.Loopback, 1339));
+	
+	CheckNodeConnectivities(); 
+	Task listenToNodeTask = new Task(async () => await ListenToNode());
+	listenToNodeTask.Start();
+}
+\end{lstlisting}
+
+Wie in Listing \ref{lst:commanderWhile} zu sehen ist, wird am Ende des MainViewModel-Konstruktors nach dem Abfragen des Status für alle Nodes ein neuer Task \code{listenToNodeTask} erzeugt. Dieser bekommt die Methode \code{ListenToNode()} übergeben, in welcher eine ähnliche While-Schleife ausgeführt wird wie in Listing \ref{lst:nodeWhile}. Am Ende des Konstruktors wird der Task gestartet und das asynchrone Warten auf Nachrichten beginnt.
+
+\subsubsection{Absenden von Nachrichten}
+
+TODO
+
+

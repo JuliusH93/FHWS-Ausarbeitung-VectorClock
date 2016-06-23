@@ -15,10 +15,14 @@
 \usepackage[section]{placeins}
 \usepackage[export]{adjustbox}
 \usepackage{bm}
+
+\usepackage{xcolor}
+\usepackage{textcomp}
 \usepackage{listings}
+
 \usepackage{ifthen}
 \usepackage{eurosym}			%add euro symbol
-\usepackage{showframe}
+%\usepackage{showframe}			% show all kind of frames that latex uses
 %\usepackage{refcheck}			% checks for wrong refs
 
 \input{macros}
@@ -40,6 +44,37 @@
   	breaklines=true,                		% sets automatic line breaking
 	moredelim=[is][\bfseries]{[*}{*]},   	% enable bold style with "[*text*]" in lstlisting
 	columns=flexible
+}
+
+	\definecolor{light-gray}{gray}{0.95}
+
+\lstdefinelanguage{sharpc}{
+	basicstyle=\fontsize{10pt}{12pt}\ttfamily,
+	language=[Sharp]C, 
+	rulecolor=\color{blue!80!black},
+	morekeywords={,async, await, var,where, }
+	tabsize=3
+}
+
+\lstset{language=sharpc,
+	showspaces=false,
+	showtabs=false,
+	tabsize=4,
+	breaklines=true,
+	keepspaces=true,      
+	numbers=left,
+	numberstyle=\scriptsize,
+	stepnumber=1,
+	numbersep=8pt,
+	showstringspaces=false,
+	breakatwhitespace=true,
+	commentstyle=\color{green},
+	keywordstyle=\color{blue},
+	stringstyle=\color{red},
+	basicstyle=\ttfamily,
+	backgroundcolor=\color{light-gray},
+	%  moredelim=[il][\textcolor{pgrey}]{$$},
+	%  moredelim=[is][\textcolor{pgrey}]{\%\%}{\%\%}
 }
 
 \graphicspath{{./img/}}
