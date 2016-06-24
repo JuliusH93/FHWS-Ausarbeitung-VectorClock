@@ -2,7 +2,7 @@
 
 In diesem Kapitel wird die allgemeine Funktionsweise von Vektoruhren behandelt. Mittels geeigneten Beispielen wird die Kommunikation in einem einfachen verteilten System illustriert, um die Funktionsweise von Vektoruhren innerhalb der Kommunikation zu zeigen. Zuletzt wird auf das System eingegangen, welches im Rahmen dieser Arbeit in der Programmiersprache C\# implementiert wurde.
 \subsection{Prinzipielle Funktionsweise}
-
+\label{prinzipFunktion}
 Wie bereits beschrieben wurde, bilden Vektoruhren eine Erweiterung der Lamportuhr. Dabei wird in jedem Prozess im System ein Integer als Zähler in der Vektoruhr gespeichert. Im Allgemeinen werden durch eine Vektoruhr Zeitstempel mit Events im System assoziiert \cite{Baldoni:2002:FDC:1435723.1437765}[S. 3].
 
 Jeder Prozess im System besitzt seine eigene Vektoruhr in der Form eines Vektors $VC_i[1...n]$, wobei alle Elemente der Uhr mit $0$ initialisiert werden. Im Laufe der Kommunikation werden durch die verschiedenen, verteilten Prozesse Nachrichten untereinander verschickt. Damit durch den Einsatz von Vektoruhren nachvollzogen werden kann, wie die Zeitlichen Reihenfolge solcher Events aussieht, müssen die entsprechenden Uhren jeweils bei auftreten eines Events angepasst werden.
@@ -131,6 +131,7 @@ Im Falle einer Kommunikationsnachricht kommt der Communicationblock zum tragen. 
 Beim Absenden der Nachricht, egal ob im Commander oder in den Nodes, wird diese serialisiert und per UDP versendet. Im Empfangsfall muss der empfangene Datenstrom wieder deserialisiert und in eine Nachricht umgewandelt werden.
 
 \subsubsection{Empfang von Nachrichten}
+\label{empfangVonNachrichten}
 Sowohl der Commander als auch alle Nodes warten ständig während der Ausführung auf ankommende Nachrichten. Dies wurde im Code durch eine While-Schleife implementiert.
 
 \begin{lstlisting}[label=lst:nodeWhile,
@@ -176,9 +177,55 @@ Wie in Listing \ref{lst:commanderWhile} zu sehen ist, wird am Ende des MainViewM
 
 \subsubsection{Absenden von Nachrichten}
 
-TODO
+Das Absenden von Nachrichten funktioniert ähnlich wie das Versenden. Dabei sind die Methoden sowohl im Commander als auch den Nodes die selben, erneut jedoch mit der Einschränkung, dass bei dem Commander wieder die asynchrone Variante der Send-Methode auf dem UdpClient aufgerufen werden muss. 
 
+\begin{lstlisting}[label=lst:sendMessageTo,
+language=sharpc,
+float=ht,
+firstnumber=1,
+caption=Absenden einer Nachricht in einem Node.]
+ private void SendMessageTo(String messageText, Message msg, IPEndPoint node)
+ {
+	 if(this.endPoint.Equals(node))
+		 throw new InvalidOperationException("Sendmessage: Endpoints are equal!");
+		 
+	 using (UdpClient client = new UdpClient())
+	 {
+		 client.Connect(node);
+		 byte[] data = MessageSerializer.Serialze(msg);
+		 client.Send(data, data.Length);
+		 Console.WriteLine($"Message ({messageText}) sent to {node}");
+	 }
+ }
+\end{lstlisting}
+
+Der Methode \code{SendMessageTo()} in Listing \ref{lst:sendMessageTo} wird ein Nachrichtentext, die Nachricht selber sowie ein IPEndPoint übergeben. Der Nachrichtentext dient lediglich der Anzeige auf der Kommandozeile. Die eigentliche Nachricht wird vor dem Absenden durch die Klassen \code{MessageSezializer} zu einem Bytestrom serialisiert und anschließend durch den Client an die in dem IPEndPoint angegebene Zieladdresse verschickt.
+
+Ähnlich wie im Node-Teil des Programms läuft der Sendevorgang wie bereits erwähnt im Commander auch ab. Die Besonderheit ist hier, dass die Nodes als eigenes Objekt des Typs \code{NodeViewModel} gespeichert werden und die Send-Methode direkt auf dem jeweiligen Node ausgeführt wird. Die implizite Angabe einer Zieladdresse fällt hier weg, da diese bereits in den Nodes gespeichert wird.
 \subsubsection{Verarbeitung von Nachrichten im Node}
+Für die Implementierung der Vektoruhren ist die Behandlung von empfangenen Nachrichten in einem Node besonders interessant. An dieser Stelle kommen die Uhren, Aktualisierungen dieser sowie eventuelle Vergleiche und API-Aufrufe ins Spiel. 
 
-TODO
+\begin{lstlisting}[label=lst:handleMessageIncrease,
+language=sharpc,
+float=ht,
+firstnumber=1,
+caption=Auszug aus der \code{HandleControlMessage()}-Methode. Hier wird ein IncreaseBalance-Befehl verarbeitet.]
+else if (msg.controlBlock.Command == ControlCommand.IncreaseBalance)
+{
+Console.WriteLine("Increase command received!");
+commLogic.appLogic.IncreaseBalance(msg.controlBlock.BalanceDelta);
+Console.WriteLine($"New balance: {commLogic.appLogic.balance}");
+commLogic.IncreaseVectorClock();                                    
+Console.WriteLine($"New Clock: {this.commLogic.clock}");
+BroadcastChange();
+returnValue = true;
+}
+\end{lstlisting}
+
+Im Programmablauf findet eine Verarbeitung nach dem Empfang statt, welcher in Abschnitt \ref{empfangVonNachrichten} bereits behandelt wurde. Wie beschrieben findet anhand des Befehls, welcher in dem Kontroll-Block der Nachricht enthalten ist, eine Verzweigung in Kontroll-Ebene und Kommunikations-Eben statt. Nach dieser Verzweigung wird in der selben Methode immer eine Antwortnachricht an den Commander erstellt und abgeschickt, welche die aktuelle lokale Vektoruhr sowie den Payload der Applikationslogik enthält.
+
+Liegt eine Nachricht auf Kontrollebene vor, welche demnach von dem Commander stammt, wird die darin enthaltenen Aktion ausgeführt. Dies kann entweder eine Kontostandaktualisierung mir anschließendem Broadcast, die Aufforderung zum Senden einer Nachricht an einen anderen einzelnen Node oder ein allgemeiner Befehl wie beispielsweise \code{Shutdown} sein. Ein Auszug aus der Implementierung ist in Listing \ref{lst:handleMessageIncrease} abgebildet.
+
+Im Fall einer Kommunikationsnachricht wird diese entsprechend der in Kapitel \ref{prinzipFunktion} erläuterten Funktionsweise behandelt. Dies beinhaltet das Aktualisieren der lokalen Vektoruhr anhand der Uhr, welche an die Nachricht angehängt ist. Zudem wird der Payload verarbeitet, also in dem Kontext des Banken-Szenarios der Kontostand aktualisiert. Diese Aktualisierung ist hierbei bereits Aufgabe der Anwendungsschicht.
+
 
