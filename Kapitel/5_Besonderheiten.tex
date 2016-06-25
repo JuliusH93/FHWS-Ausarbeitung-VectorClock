@@ -1,13 +1,13 @@
 \section{Besonderheiten von Vektoruhren}
 
 Nach Betrachtung der Funktionsweise von Vektoruhren sowie einer Beschreibung von besonderen Problemen, gibt es noch weiterführende Aspekte zu beachten. Diese sind oberhalb einer reinen Betrachtung der Funktion von Vektoruhren angesiedelt und behandeln eher Themen wie die zeitliche Sortierung von Nachrichten oder eine Anbindung an eine Anwendungs-API, welche anhand der Informationen, welche Sie durch das darunterliegende Vektoruhr-System erhält, entscheidungen für den Programmablauf trifft. In diesem Kapitel wird der sogenannte Causally Ordered Multicast zum Ordnen von Nachrichten behandelt sowie auf die Rolle der Anwendungs-API innerhalb einer verteilten Systems mit Vektoruhren als Synchronisationsbasis eingegangen.
-\subsection{Causaly Ordered Multicast}
+\subsection{Causally Ordered Multicast}
 
-In einem Verteilten System kann es recht schnell passieren, dass sich die Reihenfolge von gesendeten Broadcasts bei dem Empfänger und dem Sender unterscheiden. Dies führt in gewissen Fällen zu Problemen, wenn z.B. die Daten eines zweiten Broadcast von denen des ersten abhängen, es also eine temporale korrelation gibt. Um diesen Problem zu lösen, haben Kenneth P. Birman und Thomas A. Joseph in \cite{Birman:1987:RCP:7351.7478} den sogenannten Causal Brooadcast eingeführt, welcher auch als Causaly Ordered Multicast bezeichnet werden kann.
+In einem Verteilten System kann es recht schnell passieren, dass sich die Reihenfolge von gesendeten Broadcasts bei dem Empfänger und dem Sender unterscheiden. Dies führt in gewissen Fällen zu Problemen, wenn z.B. die Daten eines zweiten Broadcast von denen des ersten abhängen, es also eine temporale korrelation gibt. Um diesen Problem zu lösen, haben Kenneth P. Birman und Thomas A. Joseph in \cite{Birman:1987:RCP:7351.7478} den sogenannten Causal Brooadcast eingeführt, welcher auch als Causally Ordered Multicast bezeichnet werden kann.
 
 Wie in \cite{Birman:1987:RCP:7351.7478}[S. 52, Kapitel 3.3] beschrieben, kann es vorkommen, dass sich die Reihenfolge der gesendeten Nachrichten eines Senders und die Reihenfolge der empfangenen Nachrichten am Empfänger unterscheiden. Dies kann etwa durch Verzögerungen auf dem Übertragungsweg geschehen. Bei einem herkömmlichen Broadcast, welcher in einem System mit Vektoruhren abgesendet wird, ist kein Mechanismus vorgesehen, um eine eventuell für die Funktionsweise der Anwendung notwendige Reihenfolge der versendeten Nachrichten einzuhalten. Die Broadcast-Nachricht wird einfach an alle Teilnehmer versendet und nicht weiter beachtet.
 
-Anders ist dies bei einem Causaly Orderen Multicast. Wie der Name bereit vermuten lässt, spielt hierbei die Ordnung der Multicasts nach deren Kausalität, also der Ursache eine Rolle. Die Ursache ist in diesem Fall das Verschicken des Broadcast am Sender. Somit werden bei einem Causal Broadcast die Nachrichten nach deren Reihenfolge des Versendens am Empfängerprozess geordnet. Um eine Rückantwort eines jeden Nodes an den Sender mit einer Empfangsbestätigung zu vermeiden, kann ein Causally Ordered Multicast auf Basis der Vektoruhren in den Empfängern umgesetzt werden. Durch die Vektoruhr kann ein Node entscheiden, ob er bei Empfang einer Nachricht alle Broadcast des entsprechenden Senders erhalten hat, die in der kausalen Vergangenheit dieses Broadcasts empfangen hat. Ist dies nicht der Fall, muss er die Nachricht in eine Warteliste setzten und diese erst annehmen, sobald alle in der Zwischenzeit passierten Broadcasts angekommen sind. Abbildung \ref{figure:causalbroadcast} verdeutlicht diese Funktionsweise genauer.
+Anders ist dies bei einem Causally Orderen Multicast. Wie der Name bereit vermuten lässt, spielt hierbei die Ordnung der Multicasts nach deren Kausalität, also der Ursache eine Rolle. Die Ursache ist in diesem Fall das Verschicken des Broadcast am Sender. Somit werden bei einem Causal Broadcast die Nachrichten nach deren Reihenfolge des Versendens am Empfängerprozess geordnet. Um eine Rückantwort eines jeden Nodes an den Sender mit einer Empfangsbestätigung zu vermeiden, kann ein Causally Ordered Multicast auf Basis der Vektoruhren in den Empfängern umgesetzt werden. Durch die Vektoruhr kann ein Node entscheiden, ob er bei Empfang einer Nachricht alle Broadcast des entsprechenden Senders erhalten hat, die in der kausalen Vergangenheit dieses Broadcasts empfangen hat. Ist dies nicht der Fall, muss er die Nachricht in eine Warteliste setzten und diese erst annehmen, sobald alle in der Zwischenzeit passierten Broadcasts angekommen sind. Abbildung \ref{figure:causalbroadcast} verdeutlicht diese Funktionsweise genauer.
 
 \begin{figure}[ht]
 	\centering
@@ -40,15 +40,54 @@ Im Laufe der Kommunikation kann es passieren, dass mehrere nacheinander empfange
 Zu erwähnen ist an dieser Stelle, dass sich die Aktualisierung einer Vektoruhr wie in dem Protokoll beschrieben etwas von der urpsrünglichen, rein auf Vektoruhren ausgelegten Vorgehensweise unterscheidet. Wie Kapitel \ref{prinzipFunktion} unter Satz R1 bis R3 angegeben, inkrementiert ein Node seinen eigenen Eintrag in der lokalen Uhr bei auslösen eines jeden Events. Für Causally Ordered Broadcasts ist dies nur beim verschicken einer Nachricht der Fall, außerdem geschieht dies erst nach dem abschicken. Der Empfänger $P_i$ hat dann die Aufgabe, seine lokale Vektoruhr an der Stelle $VC_i[j]$ zu erhöhen, er ändert bei Causally Ordered Multicasts also den Eintrag eines anderen Prozesses in seiner lokalen Uhr anstatt wie vorher seinen eigenen. Durch diese Anpassung kennt jeder Prozess zu jeder Zeit die Anzahl an abgeschickten Broadcasts an allen Prozessen und kann bei Empfang einer Nachricht sehen, ob alle vorhergehend benötigten Broadcasts bereits eingetroffen sind.
 
 \subsubsection{Umsetzung in C\# auf Basis der Vektoruhr}
-Causaly Ordered Multicasts wurden als Erweiterung der in Kapitel \ref{vectorClockImpl} beschriebenen Implementierung eingefügt. In dem gewählten Bank-Szenario sendet ein Bankautomat bei jeder Kontoaktualisierung, also einem Event, einen Broadcast an alle im System vorhandenen Prozesse. Dabei ist es jedoch egal ob die gesendeten Nachrichten über die Aktualisierung auch ankommen oder nicht beziehungsweise spielt die Reihenfolge des Empfangs für den Sender keine Rolle. Dieses System funktioniert solange, bis ein Prozess einmal eine Aktualisierung zu spät erhält und somit seinen Kontostand nicht entsprechend zum richtigen Zeitpunkt aktualisiert. Um diesem Problem entgegenzuwirken, können Causal Broadcasts verwendet werden.
+Causally Ordered Multicasts wurden als Erweiterung der in Kapitel \ref{vectorClockImpl} beschriebenen Implementierung eingefügt. In dem gewählten Bank-Szenario sendet ein Bankautomat bei jeder Kontoaktualisierung, also einem Event, einen Broadcast an alle im System vorhandenen Prozesse. Dabei ist es jedoch egal ob die gesendeten Nachrichten über die Aktualisierung auch ankommen oder nicht beziehungsweise spielt die Reihenfolge des Empfangs für den Sender keine Rolle. Dieses System funktioniert solange, bis ein Prozess einmal eine Aktualisierung zu spät erhält und somit seinen Kontostand nicht entsprechend zum richtigen Zeitpunkt aktualisiert. Um diesem Problem entgegenzuwirken, können Causal Broadcasts verwendet werden.
 
-Als Grundlage dient die in Kapitel \ref{vectorClockImpl} implementierte Vektoruhren-Mechanik. Neben den im vorherigen Abschnitt erwähnten Anpassungen für die Art und Weise, wie lokale Vektoruhren inkrementiert werden, muss für die Umsetzung des Causal Broadcasts ein Speicher für Verzögerte Nachrichten eingeführt werden. Dies wurde in Form einer einfachen Liste gemacht, welche den Typ \code{Message} als Typparemeter hat.  
+Als Grundlage dient die in Kapitel \ref{vectorClockImpl} implementierte Vektoruhren-Mechanik. Neben den im vorherigen Abschnitt erwähnten Anpassungen für die Art und Weise, wie lokale Vektoruhren inkrementiert werden, muss für die Umsetzung des Causal Broadcasts ein Speicher für verzögerte Nachrichten eingeführt werden. Dies wurde in Form der Klasse \code{OrderedMessageList} implementiert, welche wie ein Stack mit Nachrichten funktioniert. Um die zeitliche korrekte Reihenfolge der Nachrichten in der Liste zu gewährleisten, werden diese bei jeder Einfüge- oder Entfernoperation anhand von Vergleichen der Vektoruhren sortiert. 
 
-TODO: Sortieren der Liste etc.
+\begin{lstlisting}[label=lst:delayMessage,
+language=sharpc,
+float=ht,
+firstnumber=1,
+caption={Auszug aus der Methode \code{HandleCommunicationMessageOrdered()}. Hier wird geprüft, ob schon aufgeschobenen Nachrichten vorhanden sind und ob die angekommende akzeptiert werden kann.}]
+ if (delayedMessages.Count == 0) // no delayed messages
+ {
+ 	if (MessageNotAcceptable(msg))   //  delay until vc(x) <= m.vc(x) for all x
+ 	{
+ 		delayedMessages.PushItem(msg);   // Put message in queue
+ 		Console.WriteLine($"    Message {msg.communicationBlock.clock} is to early, delaying...");
+ 	}
+ 	else
+ 	UseMessageOrdered(msg);     // Message ist ok, use it!
+ }
+ else
+ [...]
+\end{lstlisting}
 
-Damit ankommenden Nachrichten eventuell aufgehoben werden können, muss die Methode \code{HandleCommunicationMessage()} angepasst werden. Diese akzeptiert in der einfachen Vektoruhr-Implementierung alle Nachrichten und verarbeitet deren Inhalt. In der erweiterten Umsetzung, \code{HandleCommunicationMessageOrdered() genannt,} findet vorher eine Überprüfung statt, ob die neue Nachricht akzeptiert wird oder verzögert werden muss. Als Bedingung wird hier geprüft, ob die zu prüfenden Uhr zeitlich gesehen kleiner als die aktuelle lokale Uhr ist. Solange dies der Fall ist, muss die Nachricht aufgeschoben werden. 
-TODO: Aufheben von nicht akzeptierten Nachrichten am Code zeigen
- 
+Damit ankommende Nachrichten eventuell aufgehoben werden können, muss die Methode \code{HandleCommunicationMessage()} angepasst werden. Diese akzeptiert in der einfachen Vektoruhr-Implementierung alle Nachrichten und verarbeitet deren Inhalt. In der erweiterten Umsetzung, \code{HandleCommunicationMessageOrdered()} genannt, findet vorher eine Überprüfung statt, ob die neue Nachricht akzeptiert wird oder verzögert werden muss. Als Bedingung wird hier geprüft, ob die zu untersuchende Uhr zeitlich gesehen kleiner als die aktuelle lokale Uhr ist. Solange dies der Fall ist, muss die Nachricht aufgeschoben werden. Man kann deshalb sagen, dass ein Node in der Umsetzung des Causally Ordered Multicasts immer auf die nächste fehlende Nachricht wartet und alle neueren Nachrichten als diese aufhebt, bis die passende angekommen ist.
+
+\begin{lstlisting}[label=lst:useMessage,
+language=sharpc,
+float=ht,
+firstnumber=1,
+caption={Verarbeitung einer akzeptierten Nachricht.}]
+private void UseMessageOrdered(Message msg)
+{
+	Console.WriteLine($"    Message {msg.communicationBlock.clock} is ok! Using it.");
+	this.commLogic.clock.update(msg.communicationBlock.clock);
+	this.commLogic.appLogic.balance = msg.communicationBlock.payload.balance;
+	if (this.commLogic.clock.getID() != msg.communicationBlock.clock.getID())
+	{
+		this.commLogic.IncreaseVectorClock(msg.communicationBlock.clock.getID());           // update control variable
+		Console.WriteLine($"    Increased clock[{msg.communicationBlock.clock.getID()}]: {this.commLogic.clock}");
+	}
+}
+
+
+\end{lstlisting}
+
+Sobald eine Nachricht als akzeptiert eingestuft ist, wird sie durch einen Aufruf der Methode \code{UseMessageOrdered()} verarbeitet und kann nun sozusagen an die Anwendungsschicht weitergegeben werden. Diese Weitergabe geschieht in diesem Beispiel dadurch, dass der lokale Kontostand in der Applikationslogik auf den Stand des sich in der Nachricht befindlichen Kontostandes aktualisiert wird. Listing \ref{lst:useMessage} zeigt die Methode anhand eines Codebeispiels.
+
+\FloatBarrier
 \subsection{Rolle der Anwendungsschicht (Anwendungs-API)}
 TODO
 \label{RolleDerAnwendung}
