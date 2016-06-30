@@ -1,6 +1,84 @@
-\section{Arten von Uhren}
+\section{Synchronisation in verteilen Systemen}
+\subsection{Modell}
+% Events: senden, empfangen, internal
+Dieser Abschnitt beschreibt ein vereinfachtes Modell eines verteilten Systems, welches als Grundlage für alle weiteren Ausführungen heran gezogen wird.
+Der Einfachheit halber wird ein sehr grundlegendes Modell verwendet, welches jedoch ausreichend ist um die in dieser Arbeit geschilderten Zusammenhänge darzustellen, ohne Beschränkung der Allgemeinheit.
+
+In unserem Modell besteht ein verteiltes System aus $n$ Prozesse die durch die Menge $P=\{p_1, p_2,\ldots, p_n\}$ beschrieben sind.
+Die Prozesse können lediglich durch das Senden und Empfangen von Nachrichten kommunizieren.
+Dabei wird angenommen, dass Nachrichten zuverlässig verschickt werden und somit in jedem Fall, nach einer gewissen Verzögerung, beim Empfänger ankommen.
+Nachrichten müssen nicht zwangsläufig in der selben Reihenfolge ankommen in der sie gesendet wurden.
+Dies ist dem Übertragungsweg geschuldet.
+
+Ein Prozess $p_i$ besteht aus einer Sequenz von Ereignissen $E_i=\{e_i^1, e_i^2, \ldots\}$, welche eine totale Ordnung aufweisen.
+Diese Ordnung ergibt sich durch den Programmablauf des Prozesses und wird durch die Relation $\rightarrow$ beschrieben.
+Löst ein Prozess $p_i$ zum Beispiel zuerst ein Ereignis $e_i^x$ aus und anschließend ein Zweites $e_i^y$, gilt $e_i^x \rightarrow e_i^y$. \fig{fig:genericEvents} zeigt eine exemplarische Kommunikation zwischen drei Prozessen und deren Ereignisse.
+
+Jedes Ereignis ist atomar und stellt eine Zustandsänderung des dazugehörigen Prozesses dar.
+Für die in dieser Arbeit beschriebenen Verfahren sind von besonderer Interesse die \qq{gesendet}- und \qq{empfangen}-Ereignisse.
+Diese Ereignisse weisen Abhängigkeiten unter den Prozessen auf, welche die Notwendigkeit schafft die Prozesskommunikation zu synchronisieren.
+Die beiden Ereignisse können daher als Erweiterung der lokalen Programmordnung eines Prozesses auf das verteilte System betrachtet werden.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=12cm]{2_generic_events.pdf}
+    \caption[Beispiel einer beliebigen Kommunikation]{TODO}
+    \label{fig:genericEvents}
+\end{figure}
+
+Außerdem geht unser Modell davon aus, dass das ein Prozess aus drei Schichten besteht.
+Dies ist für die theoretische Definition unwesentlich, erleichtert aber die praktische Umsetzung und verbessert das Verständnis.
+Die höchste Schicht ist die Anwendungsschicht, hier wird die Applikationslogik implementiert die durch das verteilte System abgebildet werden soll.
+In der mittleren Schicht wird die Synchronisation der Kommunikation vorgenommen und kann somit für die Anwendungsschicht transparent  erfolgen.
+Die unterste Schicht stellt die Netzwerkschicht dar, die Aufgabe dieser Schicht ist es die Nachrichten physikalisch zu übertragen.
+
+\subsection{Ordnung}
+% ungeordnet
+% kausale Ordnung
+% partielle kausale Ordnung
+% totale Ordnung
+\subsection{Uhren}
 In diesem Kapitel werden unterschiedliche Uhrtypen vorgestellt.
-\subsection{Physikalische Uhren}
-\subsection{Lamport Uhren}
-\subsection{Vektor Uhren}
-\subsection{Interval Tree Uhren}
+Generell wird zwischen physikalischen und logischen Uhren unterschieden \cite{Tanenbaum2007}. 
+\subsubsection{Physikalische Uhren}
+In der Regel besitzen heutige CPUs Schaltkreise die als Zeitgeber für die Uhrzeit verwendet werden.
+Obwohl häufig als Uhr bezeichnet handelt es sich hierbei viel mehr um einen Zähler.
+Ein im Prozessor integrierter Quarzkristall schwingt bei angelegter Spannung mit einer fest definierten Frequenz.
+Mit dieser gegeben Frequenz kann nun ein Zähler pro Sekunde einmal inkrementiert werden und somit als Zeitgeber verwendet werden.
+
+Bisher wurde die Darstellung eines Zeitpunktes weitestgehend ignoriert. Es liegt nahe, dass die für Menschen intuitive aufgeteilte Darstellung von Datum und Uhrzeit für Computer umständlich ist. Daher gibt es unterschiedliche Systeme, wie ein Zeitpunkt dargestellt werden kann.
+
+Ein gängiges System um Zeitpunkte zu bestimmen ist die Unixzeit.
+Dabei werden alle Sekunden seit dem 1. Januar 1970 um 00:00:00 Uhr UTC gezählt.
+Ein Zeitpunkt kann daher einfach als Ganzzahl dargestellt werden.
+Der große Vorteil dieses Systems liegt in seiner Einfachheit.
+So kann mit einer Rechenoperation die Zeitdauer zwischen zwei Timestampes berechnen oder durch einen einfachen Vergleich festgestellt werden, welcher Timestamp weiter in der Vergangenheit liegt.
+
+Wird nun jedem Ereignis in einem verteilten System ein Unix-Timestamp zugewiesen, kann eine zeitliche Ordnung der Ereignisse über Prozessgrenze hinaus erreicht werden. Dies wird durch eine einfache Sortierung nach dem Zeitstempel erzielt.
+Ein Problem dieser Herangehensweise ist die Auflösung des Zeitstempels. Treten mehrere Ereignisse innerhalb einer Sekunde auf, kann ihre Reihenfolge nicht am Timestamp festgestellt werden, da sich dieser logischerweise nur jede Sekunde ändert.
+
+Ein weiteres Problem ist die Genauigkeit von physikalischen Uhren.
+So besitzt jeder Quartzkristall eine gewisse Schwankung in seiner Frequenz.
+Dadurch driftet die Computeruhr immer weiter von der tatsächlichen Zeit ab.
+Umgangssprachlich würde man sagen, die Uhr geht vor bzw. nach.
+Dieses Abdriften lässt sich nur durch Verwendung von genaueren Uhren wie z.B. Atomuhren vermeiden.
+Es ist jedoch unpraktikabel in jeden Computer eine Atomuhr zu installieren, daher muss die Uhr eines Computers mit einer anderen exakten Uhr regelmäßig synchronisiert werden.
+In Netzwerken wird hierzu in der Regel das in der Einleitung erwähnte NTP Protokoll verwendet.
+
+Für ein verteiltes System kann der absolute Fehler einer Uhr vernachlässigt werden, solang alle beteiligten Prozesse den selben Fehler haben und somit relativ innerhalb des Systems richtig sind.
+Liegen zum Beispiel die Uhren aller Prozesse exakt 10 Sekunden in der Vergangenheit, kann die Reihenfolge der Ereignisse immer noch festgestellt werden. Weisen jedoch nur manche Prozesse einen Fehler auf, kann die Reihenfolge nicht mehr korrekt aus den Zeitstempel erschlossen werden.
+
+Dieser Abweichung einzelner Uhren kann durch geeigneter Algorithmen entgegnet werden.
+Ein solcher Algorithmus ist der Berkeley-Algorithmus. Dieser erfordert einen globalen Zeitgeber.
+
+\subsubsection{Lamport Uhren}
+Leslie Lamport beschreibt in seinem Paper \cite{Lamport1978} von 1978 ein Verfahren um Prozesse durch logische Uhren zu synchronisieren.
+Sein vorgeschlagener Algorithmus ist heute als Lamport Uhr bekannt und stellt eine simple Möglichkeit dar, partielle kausale Ordnung in einem verteilen System herzustellen.
+Die Idee dahinter ist es, dass jeder Prozess einen eigenen Zähler, die Lamport Uhr, hält und bei Eintritt eines Ereignisses diese Zähler inkrementiert.
+Sendet nun ein Prozess eine Nachricht, hängt er seinen aktuellen Zählerstand als Zeitstempel an die Nachricht an.
+Empfängt nun ein anderer Prozess eine Nachricht kann er anhand des Zeitstempels der Nachricht und seiner Uhr 
+
+Während bei physikalischen Uhren die Zeit stetig voran schreitet und einem Ereignis eine Momentaufnahme der Zeit als Zeitstempel zugewiesen wird, wird bei einer Lamport Uhr die
+Die Idee dahinter ist es, die Uhr bei Eintritt eines Ereignisses zu inkrementieren.
+\subsubsection{Vektor Uhren}
+\subsubsection{Interval Tree Uhren}
