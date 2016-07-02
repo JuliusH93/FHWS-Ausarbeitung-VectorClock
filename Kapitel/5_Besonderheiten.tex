@@ -88,6 +88,28 @@ private void UseMessageOrdered(Message msg)
 Sobald eine Nachricht als akzeptiert eingestuft ist, wird sie durch einen Aufruf der Methode \code{UseMessageOrdered()} verarbeitet und kann nun sozusagen an die Anwendungsschicht weitergegeben werden. Diese Weitergabe geschieht in diesem Beispiel dadurch, dass der lokale Kontostand in der Applikationslogik auf den Stand des sich in der Nachricht befindlichen Kontostandes aktualisiert wird. Listing \ref{lst:useMessage} zeigt die Methode anhand eines Codebeispiels.
 
 \FloatBarrier
+
 \subsection{Rolle der Anwendungsschicht (Anwendungs-API)}
-TODO
 \label{RolleDerAnwendung}
+In diesem Kapitel wird hervorgehoben, welche Funktion die Anwendungsschicht in einem verteilten System einnimmt und wie die Rolle Vektoruhren im Bezug auf eine Verarbeitung und Ordnung von Nachrichten zwischen Prozessen für eine Anwendungs-API spielen.
+
+\subsubsection{Aufteilung eines verteilten Systems}
+Ein verteiltes System kann in seiner Gesamtheit durch verschiedene Schichten dargestellt werden. Dabei stellt jede Schicht nach oben hin zur nächsten Schicht eine Abstraktion seiner eigenen Funktionalität dar, welche durch Schnittstellen von der höheren Schicht aufgerufen werden können. Eine solche Aufteilung in einem Schichtenmodell wird in \cite{Coulouris2011} verwendet und ist in Abbildung \ref{figure:schichtenaufbau} grafisch dargestellt.
+
+ \begin{figure}[ht]
+ 	\centering
+ 	\includegraphics[width=10cm]{aufbauVerteiltesSystem.PNG}
+ 	\caption[Verteiltes System als Schichtemodell]{Aufteilung eines verteilten Systems in einzelne Schichten. Jede Schicht abstrahiert seine Funktionalität zur nächst höheren Schicht und stellt diese durch Schnittstellen bereit.}
+ 	Quelle: \cite{Coulouris2011}[S. 146, Abbildung 4.1]
+ 	\label{figure:schichtenaufbau}
+ \end{figure}
+ \FloatBarrier
+ 
+ Die unterste Schicht stellt reinen Netzwerkfunktionen bereits, damit eine Kommunikation zwischen zwei oder mehreren Prozessen in einem verteilten System überhaupt stattfinden kann. In dieser Schicht befinden sich die Protokolle zur Netzwerkkommunikation, in diesem Fall also UDP und TCP. Auf dieser Ebenen ist eine Nachricht noch nicht als solche vorhanden, sondern es werden lediglich Byteströme ausgetauscht.
+ 
+ Der zweite Block in dem Schichtenmodell ist die sogenannte Middleware. Hier befinden sich diejenigen Funktionen, welche eine sinnvolle und korrekte Kommunikation zwischen Prozessen ermöglichen. Ausgehend von den durch die Netzwerkschickt abstrahierten Funktionen für die physikalische Kommunikation werden nun aus den ankommenden Byteströmen Nachrichten gemacht. In dieser Schicht werden auch alle Arten von logischen Uhren eingeordnet, also auch Vektoruhren.
+ 
+ Die höchste und damit von den Funktionen her auch am meisten abstrahierte Schicht ist die Applikations- oder Anwendungsschicht. In dieser Schicht befindet sich die Anwendungslogik des Programms, welches auf dem verteilten System läuft. In dieser Schicht befindet sich die eigentliche Logik des Programms. In dieser wird entschieden, wie eine ankommende Nachricht behandelt und im Kontext des Einsatzzweckes des Programms sinnvoll genutzt werden kann. Als Basis dienen hierbei die Nachrichten, welche von der Middleware die Anwendungsschicht weitergereicht werden. Die Applikationsschicht muss sich also nicht um die physikalische Kommunikation sowie das erzeugen von Nachrichten aus den ankommenden Daten kümmern sonder fokussiert sich voll und ganz auf eine sinnvolle und logische Verwendung der Nachrichten.
+
+\subsubsection{Zusammenhang zwischen Vektoruhren und der Anwendungsschicht}
+Betrachtet man die Einordnung von Vektoruhren in das Gesamtbild, so fällt auf, dass diese weniger für eine kausale Ordnung von Nachrichten gedacht sind, als für eine Markierung von Zeitpunkten, zu welchen die Events in den jeweiligen Prozessen stattgefunden haben. Somit stellen Vektoruhren als auch logische Uhren allgemein eine Grundlage für die Anwendungsschicht dar, um die ankommenden Nachrichte in eine Kausale Ordnung zu bringen. 
