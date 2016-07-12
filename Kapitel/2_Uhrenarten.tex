@@ -1,53 +1,4 @@
 \section{Synchronisation in verteilen Systemen}
-\subsection{Kausalität und Ordnung}
-% ungeordnet
-% kausale Ordnung
-% partielle kausale Ordnung
-% totale Ordnung
-Der Zusammenhang zwischen Ursache und Wirkung wird als Kausalität bezeichnet.
-Es wird also die Abfolge von aufeinander bezogenen Ereignisse oder Zustände betrachtet.
-Meist ist es nicht direkt ersichtlich ob Ereignisse kausal zusammenhängen, hierzu müssen die Gegebenheiten und Zusammenhänge der Ereignisse genau bekannt sein.
-Dies ist nicht immer gegeben und auch nicht einfach entscheidbar. % TODO Beispiel wo es nicht einfach ist?
-Daher wird im folgenden immer von potentieller Kausalität gesprochen.
-Das bedeutet, dass nur Aussagen darüber gemacht werden ob ein Ereignis die Ursache für ein Anderes sein kann.
-
-In einem einzigen nicht nebenläufigen Prozess ist die potentielle Kausalität gegeben durch den Programmablauf.
-Da die Instruktionen eines Programmes geradlinig von oben nach unten ausgeführt werden und dabei jede Instruktion atomar ist, kann der aktuelle Zustand nur aus den davor ausgeführten Instruktionen bestimmt worden sein.
-Hierbei kann eine Instruktion analog zu einem Ereignis verstanden werden.
-
-Im Vergleich hierzu ist die Situation in einem verteilten System oder nebenläufigen Prozess deutlich komplexer.
-Durch die Verteilung und Parallelität des Programmcodes ist die \qq{natürliche} Ordnung nicht mehr gegeben.
-Innerhalb eines Prozesses ist die Ordnung weiterhin gegeben, da sich ein lokaler Prozess wie oben geschildert verhält.
-Wird nun aber das Gesamtbild, also das ganze System betrachtet, sind die Eigenschaften von oben nicht mehr gegeben.
-Das Wissen um die Kausalität der Ereignisse ist jedoch häufig notwendig um die Konsistenz des Systems zu wahren.
-
-Der potentielle kausale Zusammenhang zwischen Ereignisse kann durch die Zeit festgestellt werden.
-Ein Ereignis, welches zu einem späteren Zeitpunkt eingetreten ist, kann unmöglich die Ursache für ein vorhergehendes Ereignis sein.
-Sind also die Zeitpunkte der Ereignisse bekannt, kann eine Aussage über die Kausalität getroffen werden.
-Menschen haben ein intuitives Verständnis solcher Zusammenhänge.
-
-Eine zeitliche Ordnung der Ereignisse ist somit die Grundlage für die Erkennung kausaler Zusammenhänge.
-Damit eine Ordnung hergestellt werden kann, müssen die Ereignisse in Relation gesetzt werden können.
-Eine Relation wurde bereits beschrieben, nämlich die \qq{Programm-Ordnung} $\rightarrow$.
-
-Lamport \cite{Lamport1978} definiert in seiner Arbeit die \qq{happend before}-Relation $\Rightarrow$ und stellt die kleinste Relation dar, die folgende Bedingungen erfüllt:
-\begin{itemize}
-    \item Wenn $e_i^x \rightarrow e_i^y$, dann $e_i^x \Rightarrow e_i^y$.
-    \item Wenn $e_i^x$ ist ein Senden Ereignis und $e_j^y$ ist das Empfangen Ereignis der selben Nachricht, dann $e_i^x \Rightarrow e_j^y$.
-    \item Wenn $e_i^x \Rightarrow e_j^y$ und $e_j^y \Rightarrow e_k^z$, dann $e_i^x \Rightarrow e_k^z$.
-\end{itemize}
-
-Ein Ereignis $e_j^y$ gilt als kausal abhängig von $e_i^x$ wenn $e_i^x \Rightarrow e_j^y$, da es nur ausgeführt werden kann wenn die Ausführung von $e_i^x$ bereits abgeschlossen ist.
-Alternativ kann $e_i^x$ als Vorbedingung von $e_j^y$ betrachtet werden.
-Offensichtlich kann also eine Nachricht nicht empfangen werden, wenn sie noch nicht verschickt wurde.
-Dieser Zusammenhang ist für Menschen zwar intuitiv ersichtlich kann nun aber auch für Computer korrekt formuliert werden.
-
-Zwei Ereignisse gelten als gleichzeitig aufgetreten wenn $e_i^x \centernot\Rightarrow e_j^y$ und $e_j^y \centernot\Rightarrow e_i^x$ gilt.
-Dann können diese beiden Ereignisse parallel ausgeführt werden, da keines das jeweils Andere kausal beeinflussen kann.
-Diese Nebenläufigkeit wird in Symbolen als $e_i^x \parallel e_j^y$ geschrieben.
-
-
-
 \subsection{Systemmodell}
 % Events: senden, empfangen, internal
 Dieser Abschnitt beschreibt ein vereinfachtes Modell eines verteilten Systems, welches als Grundlage für alle weiteren Ausführungen heran gezogen wird.
@@ -81,9 +32,101 @@ Die höchste Schicht ist die Anwendungsschicht, hier wird die Applikationslogik 
 In der mittleren Schicht wird die Synchronisation der Kommunikation vorgenommen und kann somit für die Anwendungsschicht transparent  erfolgen.
 Die unterste Schicht stellt die Netzwerkschicht dar, die Aufgabe dieser Schicht ist es die Nachrichten physikalisch zu übertragen.
 
+\subsection{Kausalität und Ordnung}
+\label{cap:ordnung}
+% ungeordnet
+% kausale Ordnung
+% partielle kausale Ordnung
+% totale Ordnung
+Der Zusammenhang zwischen Ursache und Wirkung wird als Kausalität bezeichnet.
+Es wird also die Abfolge von aufeinander bezogenen Ereignisse oder Zustände betrachtet.
+Meist ist es nicht direkt ersichtlich ob Ereignisse kausal zusammenhängen, hierzu müssen die Gegebenheiten und Zusammenhänge der Ereignisse genau bekannt sein.
+Dies ist nicht immer gegeben und auch nicht einfach entscheidbar. % TODO Beispiel wo es nicht einfach ist?
+Daher wird im folgenden immer von potentieller Kausalität gesprochen.
+Das bedeutet, dass nur Aussagen darüber gemacht werden ob ein Ereignis die Ursache für ein Anderes sein kann.
+
+In einem einzigen nicht nebenläufigen Prozess ist die potentielle Kausalität gegeben durch den Programmablauf.
+Da die Instruktionen eines Programmes geradlinig von oben nach unten ausgeführt werden und dabei jede Instruktion atomar ist, kann der aktuelle Zustand nur aus den davor ausgeführten Instruktionen bestimmt worden sein.
+Hierbei kann eine Instruktion analog zu einem Ereignis verstanden werden.
+
+Im Vergleich hierzu ist die Situation in einem verteilten System oder nebenläufigen Prozess deutlich komplexer.
+Durch die Verteilung und Parallelität des Programmcodes ist die \qq{natürliche} Ordnung nicht mehr gegeben.
+Innerhalb eines Prozesses ist die Ordnung weiterhin gegeben, da sich ein lokaler Prozess wie oben geschildert verhält.
+Wird nun aber das Gesamtbild, also das ganze System betrachtet, sind die Eigenschaften von oben nicht mehr gegeben.
+Das Wissen um die Kausalität der Ereignisse ist jedoch häufig notwendig um die Konsistenz des Systems zu wahren.
+
+Der potentielle kausale Zusammenhang zwischen Ereignisse kann durch die Zeit festgestellt werden.
+Ein Ereignis, welches zu einem späteren Zeitpunkt eingetreten ist, kann unmöglich die Ursache für ein vorhergehendes Ereignis sein.
+Sind also die Zeitpunkte der Ereignisse bekannt, kann eine Aussage über die Kausalität getroffen werden.
+Menschen haben ein intuitives Verständnis solcher Zusammenhänge.
+
+Eine zeitliche Ordnung der Ereignisse ist somit die Grundlage für die Erkennung kausaler Zusammenhänge.
+Damit eine Ordnung hergestellt werden kann, müssen die Ereignisse in Relation gesetzt werden können.
+Eine Relation wurde bereits beschrieben, nämlich die \qq{Programmordnung} $\rightarrow$.
+
+Lamport \cite{Lamport1978} definiert in seiner Arbeit die \qq{happend before}-Relation $\Rightarrow$ und stellt die kleinste Relation dar, die folgende Bedingungen erfüllt:
+\begin{itemize}
+    \item Wenn $e_i^x \rightarrow e_i^y$, dann $e_i^x \Rightarrow e_i^y$.
+    \item Wenn $e_i^x$ ein Senden Ereignis ist und $e_j^y$ das Empfangen Ereignis der selben Nachricht darstellt, dann folgt $e_i^x \Rightarrow e_j^y$.
+    \item Wenn $e_i^x \Rightarrow e_j^y$ und $e_j^y \Rightarrow e_k^z$, dann $e_i^x \Rightarrow e_k^z$.
+\end{itemize}
+
+Die erste Bedingung sagt aus, dass aus der strengeren Programmordnung direkt die \qq{happend before}-Relation für zwei lokale Ereignisse abgeleitet werden kann.
+Aus der zweiten Bedienung ergibt sich, dass das Empfang Ereignis einer Nachricht nie vor dem Senden Ereignis eintreten kann.
+Offensichtlich kann also eine Nachricht nicht empfangen werden, wenn sie noch nicht verschickt wurde.
+Dieser Zusammenhang ist für Menschen zwar intuitiv ersichtlich kann nun aber auch für Computer korrekt formuliert werden.
+Durch die dritte Bedingung ist die Transitivität der Relation gegeben.
+Wurde ein Ereignis $z$ nach $y$ ausgelöst und $x$ vor $y$ gilt logischerweise, dass $x$ auch vor $z$ ausgelöst werden musste und somit $x\Rightarrow z$ gilt.
+
+Ein Ereignis $e_j^y$ gilt als kausal abhängig von $e_i^x$ wenn $e_i^x \Rightarrow e_j^y$, da es nur ausgeführt werden kann wenn die Ausführung von $e_i^x$ bereits abgeschlossen ist.
+Alternativ kann $e_i^x$ als Vorbedingung von $e_j^y$ betrachtet werden.
+
+Zwei Ereignisse gelten als gleichzeitig aufgetreten wenn $e_i^x \centernot\Rightarrow e_j^y$ und $e_j^y \centernot\Rightarrow e_i^x$ gilt.
+Dann können diese beiden Ereignisse parallel ausgeführt werden, da keines das jeweils Andere kausal beeinflussen kann.
+Diese Nebenläufigkeit wird in Symbolen als $e_i^x \parallel e_j^y$ geschrieben.
+
+Es ist offensichtlich, dass jede korrekte logische Uhr die \qq{happend before}-Relation einhalten muss.
+Lamport folgert daraus die Uhrbedingung (engl. \qq{clock condition}) die jede korrekte logische Uhr erfüllen muss:
+\begin{equation*}
+\forall e_i^x, e_j^y \in E \colon \text{wenn } e_i^x \Rightarrow e_j^y \text{ dann } C(e_i^x) < C(e_j^y)
+\end{equation*}
+
+Aus dieser Uhrbedingung lassen sich zwei konkrete Bedingungen an den Uhren ableiten, welche sich direkt aus der Definition der $\Rightarrow$-Relation ergeben:
+\begin{itemize}
+    \item Wenn $e_i^x \rightarrow e_i^y$, dann $C(e_i^x) < C(e_i^y)$.
+    \item Wenn $e_i^x$ ein Senden Ereignis ist und $e_j^y$ das Empfangen Ereignis der selben Nachricht darstellt, dann folgt $C(e_i^x) < C(e_i^y)$.
+\end{itemize}
+
+Die dritte Bedingung aus der Definition der \qq{happend before}-Relation muss hier nicht wiederholt werden, da diese lediglich die Transitivität beschreibt und diese durch die $<$-Relation gegeben ist.
+
+Die eingeführten Regeln erlauben es nun die Zusammenhänge zwischen Ereignisse genauer zu betrachten.
+Zustellungsregeln (engl. \qq{delivery rules}) definieren Einschränkungen an der Reihenfolge wie eingehende Nachrichten an den zu verarbeiteten Prozess verschickt werden dürfen.
+Eine wichtige Regel ist die FIFO-Zustellung (\qq{First In First Out}) die besagt, dass ein Prozess $j$ Nachrichten in der Reihenfolge empfangen muss wie sie von $i$ aus gesendet wurden.
+Dabei können Nachrichten von anderen Prozessen in beliebiger Reihenfolge versandt werden.
+Es gilt somit
+\begin{equation*}
+    \text{Wenn } e_i^s \rightarrow e_i^S \text{ dann } e_j^r \rightarrow e_j^R,
+\end{equation*}
+wobei $s$ und $S$ Sende-Ereignisse darstellen und $r/R$ die entsprechenden Empfang-Ereignisse sind.
+In dieser Definition ist keine bestimmte Reihenfolge an Ereignisse von anderen Prozessen gefordert.
+
+Eine Weitere Zustellungsregeln ist die kausale Zustellung (engl. \qq{causal delivery}), welche strenger als die FIFO-Zustellung ist:
+\begin{equation*}
+    \text{Wenn } e_i^s \Rightarrow e_k^S \text{ dann } e_j^r \rightarrow e_j^R,    
+\end{equation*}
+Die kausale Zustellung erfordert zusätzlich zur FIFO-Zustellung, dass gesendete Nachrichten von verschiedenen Prozessen geordnet werden, sofern diese kausal nach der \qq{happend before}-Relation zusammenhängen.
+
+Damit ein kausale Zustellung implementiert werden kann, muss die Uhr in der Lage sein Aussetzer in der Kommunikation zu erkennen.
+Diese Eigenschaft wird Unterbrechungserkennung (engl. \qq{gap detection}) genannt.
+Sie beschreibt den Umstand, dass ein Prozess in der Lage sein muss anhand zweier eingehender Nachrichten und deren Zeitstempel erkennen können muss, dass eine Nachricht existiert die in der Reihenfolge zwischen den beiden vorhanden Nachrichten gehört und bisher nicht empfangen wurde.
+Formell gesprochen muss für zwei gegebenen Uhren $C_i(e_i^x) < C_j(e_j^y)$ entschieden werden, ob ein Ereignis $e_k^z$ mit $C_i(e_i^x)<C_k(e_k^z)<C_j(e_j^y)$ existiert \cite{babaoglu1993consistent}.
+
 \subsection{Uhren}
 In diesem Kapitel werden unterschiedliche Uhrtypen vorgestellt.
-Generell wird zwischen physikalischen und logischen Uhren unterschieden \cite{Tanenbaum2007}. 
+Generell wird zwischen physikalischen und logischen Uhren unterschieden \cite{Tanenbaum2007}.
+Die im vorherigen Abschnitt beschrieben Zusammenhänge ermöglichen es logische Uhren formell zu definieren.
+Bevor jedoch logische Uhren genauer beschrieben werden, wird zu erst auf physikalische Uhren eingegangen um den Unterschied zu logischen Uhren und deren Motivation zu verdeutlichen.
+
 \subsubsection{Physikalische Uhren}
 In der Regel besitzen heutige CPUs Schaltkreise die als Zeitgeber für die Uhrzeit verwendet werden.
 Obwohl häufig als Uhr bezeichnet handelt es sich hierbei viel mehr um einen Zähler.
@@ -113,17 +156,29 @@ Für ein verteiltes System kann der absolute Fehler einer Uhr vernachlässigt we
 Liegen zum Beispiel die Uhren aller Prozesse exakt 10 Sekunden in der Vergangenheit, kann die Reihenfolge der Ereignisse immer noch festgestellt werden. Weisen jedoch nur manche Prozesse einen Fehler auf, kann die Reihenfolge nicht mehr korrekt aus den Zeitstempel erschlossen werden.
 
 Dieser Abweichung einzelner Uhren kann durch geeigneter Algorithmen entgegnet werden.
-Ein solcher Algorithmus ist der Berkeley-Algorithmus. Dieser erfordert einen globalen Zeitgeber.
+Ein solcher Algorithmus ist der Berkeley-Algorithmus. Dieser erfordert jedoch einen globalen Zeitgeber.
+Es ist allgemein akzeptiert, dass eine globale physikalische Uhr für verteile System nicht tauglich ist.
 
 \subsubsection{Lamport Uhren}
-Leslie Lamport beschreibt in seinem Paper \cite{Lamport1978} von 1978 ein Verfahren um Prozesse durch logische Uhren zu synchronisieren.
+Leslie Lamport beschreibt in seinem Paper \cite{Lamport1978} von 1978, indem er gleichzeitig kausale Ordnung definiert, ein Verfahren um Prozesse durch logische Uhren zu synchronisieren.
 Sein vorgeschlagener Algorithmus ist heute als Lamport Uhr bekannt und stellt eine simple Möglichkeit dar, partielle kausale Ordnung in einem verteilen System herzustellen.
 Die Idee dahinter ist es, dass jeder Prozess einen eigenen Zähler, die Lamport Uhr, hält und bei Eintritt eines Ereignisses diese Zähler inkrementiert.
 Sendet nun ein Prozess eine Nachricht, hängt er seinen aktuellen Zählerstand als Zeitstempel an die Nachricht an.
-Empfängt nun ein anderer Prozess eine Nachricht kann er anhand des Zeitstempels der Nachricht und seiner Uhr 
+Empfängt nun ein anderer Prozess eine Nachricht kann er anhand des Zeitstempels der Nachricht und seiner lokalen Uhr den kausalen Zusammenhang erschließen.
 
-Während bei physikalischen Uhren die Zeit stetig voran schreitet und einem Ereignis eine Momentaufnahme der Zeit als Zeitstempel zugewiesen wird, wird bei einer Lamport Uhr die
-Die Idee dahinter ist es, die Uhr bei Eintritt eines Ereignisses zu inkrementieren.
+Formall ist eine Lamportuhr durch eine Funktion definiert, welche einem Ereignis $e$ eine Nummer $C(e)$ zuweist.
+Die Uhrbedingung aus Abschnitt~\ref{cap:ordnung} wird erfüllt indem jeder Prozess $i$ seine eigene Uhr $C_i$ hält und nach folgenden Regel aktualisiert:
+\begin{itemize}
+    \item Wenn $e_i^x$ kein Empfang-Ereignis ist, dann ist $C_i(e_i^x)=C_i(e_i^{x-1})+1$
+    \item Ist $e_i^x$ ein Empfang-Ereignis der Nachricht $m$, dann ist $C_i(e_i^x)=\max\{C_i(e_i^{x-1}), C_j(e_j^y)  \} + 1$, wobei Prozess $j$ die Nachricht $m$ an $i$ geschickt hat und $C_j(e_j^y)$ der Uhrwert des Sende-Ereignis ist.
+\end{itemize}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=1\textwidth]{LamportBeispiel.pdf}
+    \caption[Exemplarische Kommunikation mit Lamport Uhr]{Kommunikation zwischen drei Prozessen unter Verwendung von Lamportuhren.}
+    \label{fig:lamportBsp}
+\end{figure}
 
 % negativ Beispiel in Plausible Clocks Constant Size Logical Clocks for Distributed Systems
 \subsubsection{Vektor Uhren}
