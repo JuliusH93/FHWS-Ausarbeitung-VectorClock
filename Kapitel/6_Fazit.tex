@@ -11,4 +11,21 @@ Neben den Eigenschaften des Causally Ordered Mulitcast wurde in diesem Kapitel z
 
 Abschließend bleibt zu sagen, dass sich Vektoruhren sehr gut für die Ordnung und Sortierung von ausgetauschten Nachrichten in verteilten Systemen eignen. Durch Erweiterungen wie etwa dem Causally Ordered Multicasts kann dies sogar noch gezielter geschehen. Man darf jedoch nicht zu viel von der Funktionsweise der Uhren erwarten. Sie dienen lediglich als Basis und unterstützen die Anwendungsschicht dabei, sinnvoll mit ankommenden Nachrichten umzugehen und diese im Kontext des Anwendungsziels zu verarbeiten. Fehler auf dem Übertragungsweg oder der Ausfall von beteiligten Prozessen können durch Vektoruhren lediglich erkannt, jedoch nicht direkt verhindern oder ausgebessert werden. Dies bleibt weiterhin Aufgabe der Anwendungsebene.
 \subsection{Ausblick}
+Die grundlegende Funktionsweise von Vektoruhren ist bereits ein sehr interessantes und umfangreiches Thema. In der Literatur finden sich aufbauend darauf noch viele weitere Einsatzmöglichkeiten für diese Art der logischen Uhren.
+
+Dabei lassen sich grundsätzlich zwei verschiedene Varianten unterscheiden. Die erste nimmt Vektoruhren als Basis und ändert deren Funktionalität derart ab, sodass damit ein spezielles Problem gelöst werden kann. Im Folgenden werden einige Beispiele aus der Literatur aufgezeigt.
+
+Die effiziente Speicherung von Vektoruhren ist, wie sich herausgestellt hat, in großen Systemen mit vielen beteiligten Prozessen ein Problem. Neben der in dieser Arbeit vorgestellten Lösung über Matrixuhren gibt es noch weitere, weitaus effizientere aber auch komplexere Ansätze für die Lösung dieses Problems. Eines davon sind die \cite{Gidenstam2004} vorgestellten NUREV-Clocks, was ausgeschreiben für \texttt{Non-Uniformly Mapped R-Entries Vector Clocks} steht. Die Idee dieser Art von Uhren ist es, eine dynamische Zuordnung zwischen den Prozessen in System und deren Einträgen in der Vektoruhr zu schaffen und dabei die Vektorgröße zu beschränken. Im herkömmlichen Fall ist diese starr, jeder Prozess hat also eine feste ID. Die Zuordnungen können während der Laufzeit dann dynamisch angepasst und optimiert werden, was im Endeffekt eine effizientere Speicherung und Übertragung der Vektoruhren während der Kommunikation ermöglicht.
+
+TODO:HVC erklären... nochmal genau nachlesen!
+
+Ein etwas anderer Anwendungsfall ist eine Ordnung von Events in parallel arbeitenden Systemen. Diese arbeiten nicht verteilt, aber dafür mit mehreren, gleichzeitig ausgeführten Tasks. Im Programmablauf eines solchen Systems wechseln sich sequentielle und parallele Ausführungsschritte ab, was auch als \texttt{Nested Paralellism} bezeichnet wird. Die in \cite{Audenaert1997} beschriebene Methode setzt dabei auf die Technik der \textit{Clock Trees}. 
+TODO: Grobe Funktionsweise.
+
+
+
+Die zweite Variante nimmt Vektoruhren in der Funktionsweise, wie sie in dieser Arbeit auch beschrieben wurde und setzt sie für Anwendungen ein, die sich von der Ursprünglichen Idee der kausalen Ordnung von Nachrichten in verteilten Systemen unterscheidet. Ein erstes Beispiel hierfür ist das finden von Abhängigkeiten in Web-Services, wie es in \cite{Romano2011} durchgeführt wird. Romano et al. haben in ihrer Arbeit eine Methode entwickelt, wie man die Zusammenhänge unterschiedlicher, zusammenarbeitender Web-Services durch den Einsatz von Vektoruhren untersuchen kann. Das Problem bei solchen Systemen ist häufig, das dieses Zusammenspiel undurchsichtig ist und der Aufbau von serviceorientierte Architekturen schwer nachvollzogen werden kann. Eine direkte Folge stellt dabei die leichte Verbesserung der Antwortzeiten des in \cite{Romano2011} beschriebenen Systems durch eine solche Analyse und Anpassung dar.
+
+
+Wie man sehen kann, eröffnete die Erfindung von logischen Uhren im allgemeinen und Vektoruhren im speziellen den Weg für viele interessante Weiterentwicklungen. 
 %Version Vector
