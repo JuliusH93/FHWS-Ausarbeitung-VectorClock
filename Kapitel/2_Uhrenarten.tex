@@ -11,13 +11,14 @@ Nachrichten müssen nicht zwangsläufig in der selben Reihenfolge ankommen in de
 Dies ist dem Übertragungsweg geschuldet.
 
 Ein Prozess $p_i$ besteht aus einer Sequenz von Ereignissen $E_i=\{e_i^1, e_i^2, \ldots\}$, welche eine totale Ordnung aufweisen.
+Die Menge $E$ enthält alle Ereignisse die im kompletten System auftreten.
 Diese Ordnung ergibt sich durch den Programmablauf des Prozesses und wird durch die Relation $\rightarrow$ beschrieben.
 Löst ein Prozess $p_i$ zum Beispiel zuerst ein Ereignis $e_i^x$ aus und anschließend ein Zweites $e_i^y$, gilt $e_i^x \rightarrow e_i^y$. \fig{fig:genericEvents} zeigt eine exemplarische Kommunikation zwischen drei Prozessen und deren Ereignisse.
 
 Jedes Ereignis ist atomar und stellt eine Zustandsänderung des dazugehörigen Prozesses dar.
 Für die in dieser Arbeit beschriebenen Verfahren sind von besonderer Interesse die \qq{gesendet}- und \qq{empfangen}-Ereignisse.
 Diese Ereignisse weisen Abhängigkeiten unter den Prozessen auf, welche die Notwendigkeit schafft die Prozesskommunikation zu synchronisieren.
-Die beiden Ereignisse können daher als Erweiterung der lokalen Programmordnung eines Prozesses auf das verteilte System betrachtet werden.
+Beiden Ereignisse können daher als Erweiterung der lokalen Programmordnung eines Prozesses auf das verteilte System betrachtet werden.
 
 \begin{figure}[ht]
     \centering
@@ -26,7 +27,7 @@ Die beiden Ereignisse können daher als Erweiterung der lokalen Programmordnung 
     \label{fig:genericEvents}
 \end{figure}
 
-Außerdem geht unser Modell davon aus, dass das ein Prozess aus drei Schichten besteht.
+Außerdem geht unser Modell davon aus, dass ein Prozess aus drei Schichten besteht.
 Dies ist für die theoretische Definition unwesentlich, erleichtert aber die praktische Umsetzung und verbessert das Verständnis.
 Die höchste Schicht ist die Anwendungsschicht, hier wird die Applikationslogik implementiert die durch das verteilte System abgebildet werden soll.
 In der mittleren Schicht wird die Synchronisation der Kommunikation vorgenommen und kann somit für die Anwendungsschicht transparent  erfolgen.
@@ -45,8 +46,8 @@ Dies ist nicht immer gegeben und auch nicht einfach entscheidbar. % TODO Beispie
 Daher wird im folgenden immer von potentieller Kausalität gesprochen.
 Das bedeutet, dass nur Aussagen darüber gemacht werden ob ein Ereignis die Ursache für ein Anderes sein kann.
 
-In einem einzigen nicht nebenläufigen Prozess ist die potentielle Kausalität gegeben durch den Programmablauf.
-Da die Instruktionen eines Programmes geradlinig von oben nach unten ausgeführt werden und dabei jede Instruktion atomar ist, kann der aktuelle Zustand nur aus den davor ausgeführten Instruktionen bestimmt worden sein.
+In einem einzelnen nicht nebenläufigen Prozess ist die potentielle Kausalität gegeben durch den Programmablauf.
+Da die Instruktionen eines Programmes nacheinander ohne Vergabelungen ausgeführt werden und dabei jede Instruktion atomar ist, kann der aktuelle Zustand nur aus den davor ausgeführten Instruktionen bestimmt worden sein.
 Hierbei kann eine Instruktion analog zu einem Ereignis verstanden werden.
 
 Im Vergleich hierzu ist die Situation in einem verteilten System oder nebenläufigen Prozess deutlich komplexer.
@@ -55,15 +56,19 @@ Innerhalb eines Prozesses ist die Ordnung weiterhin gegeben, da sich ein lokaler
 Wird nun aber das Gesamtbild, also das ganze System betrachtet, sind die Eigenschaften von oben nicht mehr gegeben.
 Das Wissen um die Kausalität der Ereignisse ist jedoch häufig notwendig um die Konsistenz des Systems zu wahren.
 
+% TODO Konsitenz erklären vlt hier?
+
 Der potentielle kausale Zusammenhang zwischen Ereignisse kann durch die Zeit festgestellt werden.
 Ein Ereignis, welches zu einem späteren Zeitpunkt eingetreten ist, kann unmöglich die Ursache für ein vorhergehendes Ereignis sein.
 Sind also die Zeitpunkte der Ereignisse bekannt, kann eine Aussage über die Kausalität getroffen werden.
 Menschen haben ein intuitives Verständnis solcher Zusammenhänge.
 
 Eine zeitliche Ordnung der Ereignisse ist somit die Grundlage für die Erkennung kausaler Zusammenhänge.
+Ein Computer hat natürlich kein intuitives Verständnis von Zeit.
+Daher müssen einige mathematische Definitionen festgelegt werden, welche die Grundlage für die Implementierung der zeitlichen Ordnungen dienen.
+
 Damit eine Ordnung hergestellt werden kann, müssen die Ereignisse in Relation gesetzt werden können.
 Eine Relation wurde bereits beschrieben, nämlich die \qq{Programmordnung} $\rightarrow$.
-
 Lamport \cite{Lamport1978} definiert in seiner Arbeit die \qq{happend before}-Relation $\Rightarrow$ und stellt die kleinste Relation dar, die folgende Bedingungen erfüllt:
 \begin{itemize}
     \item Wenn $e_i^x \rightarrow e_i^y$, dann $e_i^x \Rightarrow e_i^y$.
@@ -71,8 +76,8 @@ Lamport \cite{Lamport1978} definiert in seiner Arbeit die \qq{happend before}-Re
     \item Wenn $e_i^x \Rightarrow e_j^y$ und $e_j^y \Rightarrow e_k^z$, dann $e_i^x \Rightarrow e_k^z$.
 \end{itemize}
 
-Die erste Bedingung sagt aus, dass aus der strengeren Programmordnung direkt die \qq{happend before}-Relation für zwei lokale Ereignisse abgeleitet werden kann.
-Aus der zweiten Bedienung ergibt sich, dass das Empfang Ereignis einer Nachricht nie vor dem Senden Ereignis eintreten kann.
+Aus der ersten Bedingung ist ersichtlich, dass aus der strengeren Programmordnung direkt die \qq{happend before}-Relation für zwei lokale Ereignisse abgeleitet werden kann.
+Die zweite Bedingung fordert, dass das Empfang Ereignis einer Nachricht nie vor dem Senden Ereignis eintreten kann.
 Offensichtlich kann also eine Nachricht nicht empfangen werden, wenn sie noch nicht verschickt wurde.
 Dieser Zusammenhang ist für Menschen zwar intuitiv ersichtlich kann nun aber auch für Computer korrekt formuliert werden.
 Durch die dritte Bedingung ist die Transitivität der Relation gegeben.
@@ -86,18 +91,18 @@ Dann können diese beiden Ereignisse parallel ausgeführt werden, da keines das 
 Diese Nebenläufigkeit wird in Symbolen als $e_i^x \parallel e_j^y$ geschrieben.
 
 Es ist offensichtlich, dass jede korrekte logische Uhr die \qq{happend before}-Relation einhalten muss.
-Lamport folgert daraus die Uhrbedingung (engl. \qq{clock condition}) die jede korrekte logische Uhr erfüllen muss:
+Lamport folgert daraus die Uhrbedingung (engl. \qq{clock condition}) die von jeder korrekten logischen Uhr erfüllen muss:
 \begin{equation*}
 \forall e_i^x, e_j^y \in E \colon \text{wenn } e_i^x \Rightarrow e_j^y \text{ dann } C(e_i^x) < C(e_j^y)
 \end{equation*}
-
+%TODO In Worte fassen, was diese Bedinung aussagt
 Aus dieser Uhrbedingung lassen sich zwei konkrete Bedingungen an den Uhren ableiten, welche sich direkt aus der Definition der $\Rightarrow$-Relation ergeben:
 \begin{itemize}
     \item Wenn $e_i^x \rightarrow e_i^y$, dann $C(e_i^x) < C(e_i^y)$.
     \item Wenn $e_i^x$ ein Senden Ereignis ist und $e_j^y$ das Empfangen Ereignis der selben Nachricht darstellt, dann folgt $C(e_i^x) < C(e_i^y)$.
 \end{itemize}
 
-Die dritte Bedingung aus der Definition der \qq{happend before}-Relation muss hier nicht wiederholt werden, da diese lediglich die Transitivität beschreibt und diese durch die $<$-Relation gegeben ist.
+Die dritte Bedingung aus der Definition der \qq{happend before}-Relation muss hier nicht explizit wiederholt werden, da diese lediglich die Transitivität beschreibt und diese durch die $<$-Relation der Uhren gegeben ist.
 
 Die eingeführten Regeln erlauben es nun die Zusammenhänge zwischen Ereignisse genauer zu betrachten.
 Zustellungsregeln (engl. \qq{delivery rules}) definieren Einschränkungen an der Reihenfolge wie eingehende Nachrichten an den zu verarbeiteten Prozess verschickt werden dürfen.
@@ -105,16 +110,17 @@ Eine wichtige Regel ist die FIFO-Zustellung (\qq{First In First Out}) die besagt
 Dabei können Nachrichten von anderen Prozessen in beliebiger Reihenfolge versandt werden.
 Es gilt somit
 \begin{equation*}
-    \text{Wenn } e_i^s \rightarrow e_i^S \text{ dann } e_j^r \rightarrow e_j^R,
+    \text{wenn } e_i^s \rightarrow e_i^S \text{ dann } e_j^r \rightarrow e_j^R,
 \end{equation*}
 wobei $s$ und $S$ Sende-Ereignisse darstellen und $r/R$ die entsprechenden Empfang-Ereignisse sind.
 In dieser Definition ist keine bestimmte Reihenfolge an Ereignisse von anderen Prozessen gefordert.
 
-Eine Weitere Zustellungsregeln ist die kausale Zustellung (engl. \qq{causal delivery}), welche strenger als die FIFO-Zustellung ist:
+Eine weitere, im Vergleich zur FIFO-Zustellung strengere, Zustellungsregel ist die kausale Zustellung (engl. \qq{causal delivery}). Diese ist gegeben 
 \begin{equation*}
-    \text{Wenn } e_i^s \Rightarrow e_k^S \text{ dann } e_j^r \rightarrow e_j^R,    
+    \text{wenn } e_i^s \Rightarrow e_k^S \text{ dann } e_j^r \rightarrow e_j^R.
 \end{equation*}
-Die kausale Zustellung erfordert zusätzlich zur FIFO-Zustellung, dass gesendete Nachrichten von verschiedenen Prozessen geordnet werden, sofern diese kausal nach der \qq{happend before}-Relation zusammenhängen.
+
+Kausale Zustellung erweitert die FIFO-Zustellung um die Einschränkung, dass gesendete Nachrichten von verschiedenen Prozessen geordnet werden, sofern diese kausal nach der \qq{happend before}-Relation zusammenhängen.
 
 Damit ein kausale Zustellung implementiert werden kann, muss die Uhr in der Lage sein Aussetzer in der Kommunikation zu erkennen.
 Diese Eigenschaft wird Unterbrechungserkennung (engl. \qq{gap detection}) genannt.
@@ -141,10 +147,16 @@ Ein Zeitpunkt kann daher einfach als Ganzzahl dargestellt werden.
 Der große Vorteil dieses Systems liegt in seiner Einfachheit.
 So kann mit einer Rechenoperation die Zeitdauer zwischen zwei Timestampes berechnen oder durch einen einfachen Vergleich festgestellt werden, welcher Timestamp weiter in der Vergangenheit liegt.
 
-Wird nun jedem Ereignis in einem verteilten System ein Unix-Timestamp zugewiesen, kann eine zeitliche Ordnung der Ereignisse über Prozessgrenze hinaus erreicht werden. Dies wird durch eine einfache Sortierung nach dem Zeitstempel erzielt.
+Wird nun jedem Ereignis in einem verteilten System ein Unix-Timestamp zugewiesen, kann theoretisch eine zeitliche Ordnung der Ereignisse über Prozessgrenze hinaus erreicht werden. Dies wird durch eine einfache Sortierung nach dem Zeitstempel erzielt.
 Ein Problem dieser Herangehensweise ist die Auflösung des Zeitstempels. Treten mehrere Ereignisse innerhalb einer Sekunde auf, kann ihre Reihenfolge nicht am Timestamp festgestellt werden, da sich dieser logischerweise nur jede Sekunde ändert.
 
-Ein weiteres Problem ist die Genauigkeit von physikalischen Uhren.
+Hier ist die Unixzeit nicht mehr ausreichend und eine andere, genauere Darstellung muss gewählt werden.
+Dabei steigt jedoch die Komplexität bei der Verarbeitung der Zeitstempel.
+Zusätzlich ist nicht sofort klar, welche Darstellung als genau genug gilt.
+Je kleiner der zeitliche Unterschied zwischen zwei Zeitstempeln desto genauer das System.
+Hierbei muss ein Kompromiss zwischen Genauigkeit, Speicherbedarf und Verarbeitungsaufwand gefunden werden.
+
+Ein weiteres Problem von physikalischen Uhren ist ihre Abweichung von der tatsächlichen Zeit.
 So besitzt jeder Quartzkristall eine gewisse Schwankung in seiner Frequenz.
 Dadurch driftet die Computeruhr immer weiter von der tatsächlichen Zeit ab.
 Umgangssprachlich würde man sagen, die Uhr geht vor bzw. nach.
@@ -157,7 +169,7 @@ Liegen zum Beispiel die Uhren aller Prozesse exakt 10 Sekunden in der Vergangenh
 
 Dieser Abweichung einzelner Uhren kann durch geeigneter Algorithmen entgegnet werden.
 Ein solcher Algorithmus ist der Berkeley-Algorithmus. Dieser erfordert jedoch einen globalen Zeitgeber.
-Es ist allgemein akzeptiert, dass eine globale physikalische Uhr für verteile System nicht tauglich ist.
+Es ist allgemein akzeptiert, dass eine globale physikalische Uhr für verteile System nicht tauglich ist. % TODO voll die Behauptung
 
 \subsubsection{Lamport Uhren}
 Leslie Lamport beschreibt in seinem Paper \cite{Lamport1978} von 1978, indem er gleichzeitig kausale Ordnung definiert, ein Verfahren um Prozesse durch logische Uhren zu synchronisieren.
@@ -175,7 +187,7 @@ Die Uhrbedingung aus Abschnitt~\ref{cap:ordnung} wird erfüllt indem jeder Proze
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=1\textwidth]{LamportBeispiel.pdf}
+    \includegraphics[width=0.80\textwidth]{LamportBeispiel.pdf}
     \caption[Exemplarische Kommunikation mit Lamport Uhr]{Kommunikation zwischen drei Prozessen unter Verwendung von Lamportuhren.}
     \label{fig:lamportBsp}
 \end{figure}
