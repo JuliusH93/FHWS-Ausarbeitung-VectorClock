@@ -161,13 +161,14 @@ firstnumber=1,
 caption=Starten eines neuen Tasks um asynchron auf eventuelle Rückantworten der Nodes zu warten.]
 public MainViewModel()
 {
-	Node1 = new NodeViewModel("mjverteil01", new IPEndPoint(IPAddress.Loopback, 1337));
-	Node2 = new NodeViewModel("mjverteil02", new IPEndPoint(IPAddress.Loopback, 1338));
-	Node3 = new NodeViewModel("mjverteil03", new IPEndPoint(IPAddress.Loopback, 1339));
-	
-	CheckNodeConnectivities(); 
-	Task listenToNodeTask = new Task(async () => await ListenToNode());
-	listenToNodeTask.Start();
+Node1 = new NodeViewModel("mjverteil01", System.Net.IPAddress.Parse("10.10.29.21"));
+Node2 = new NodeViewModel("mjverteil02", System.Net.IPAddress.Parse("10.10.29.142"));
+Node3 = new NodeViewModel("mjverteil03", System.Net.IPAddress.Parse("10.10.29.67"));
+
+CheckNodeConnectivities();
+
+Task listenToNodeTask = new Task(async () => await ListenToNode());
+listenToNodeTask.Start();
 }
 \end{lstlisting}
 
@@ -207,17 +208,17 @@ Für die Implementierung der Vektoruhren ist die Behandlung von empfangenen Nach
 language=sharpc,
 float=ht,
 firstnumber=1,
-caption=Auszug aus der \code{HandleControlMessage()}-Methode. Hier wird ein IncreaseBalance-Befehl verarbeitet.]
-else if (msg.controlBlock.Command == ControlCommand.IncreaseBalance)
-{
-Console.WriteLine("Increase command received!");
-commLogic.appLogic.IncreaseBalance(msg.controlBlock.BalanceDelta);
-Console.WriteLine($"New balance: {commLogic.appLogic.balance}");
-commLogic.IncreaseVectorClock();                                    
-Console.WriteLine($"New Clock: {this.commLogic.clock}");
-BroadcastChange();
-returnValue = true;
-}
+caption=Auszug aus der \code{HandleControlMessage()}-Methode. Hier wird ein UpdateBalance-Befehl verarbeitet.]
+ else if (msg.controlBlock.Command == ControlCommand.UpdateBalance)
+ {
+	 Console.WriteLine("Increase command received!");
+	 commLogic.appLogic.UpdateBalance(msg.controlBlock.BalanceDelta);
+	 Console.WriteLine($"New balance: {commLogic.appLogic.balance}");
+	 commLogic.IncreaseVectorClock();                                    
+	 Console.WriteLine($"New Clock: {this.commLogic.clock}");
+	 BroadcastChange(msg);
+	 returnValue = true;
+ }
 \end{lstlisting}
 
 Im Programmablauf findet eine Verarbeitung nach dem Empfang statt, welcher in Abschnitt \ref{empfangVonNachrichten} bereits behandelt wurde. Wie beschrieben findet anhand des Befehls, welcher in dem Kontroll-Block der Nachricht enthalten ist, eine Verzweigung in Kontroll-Ebene und Kommunikations-Ebene statt. Nach dieser Verzweigung wird in der selben Methode immer eine Antwortnachricht an den Commander erstellt und abgeschickt, welche die aktuelle lokale Vektoruhr sowie den Payload der Applikationslogik enthält.

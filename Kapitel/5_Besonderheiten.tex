@@ -61,13 +61,13 @@ firstnumber=1,
 caption={Auszug aus der Methode \code{HandleCommunicationMessageOrdered()}. Hier wird geprüft, ob schon aufgeschobenen Nachrichten vorhanden sind und ob die angekommende akzeptiert werden kann.}]
  if (delayedMessages.Count == 0) // no delayed messages
  {
- 	if (MessageNotAcceptable(msg))   //  delay until vc(x) <= m.vc(x) for all x
- 	{
- 		delayedMessages.PushItem(msg);   // Put message in queue
- 		Console.WriteLine($"    Message {msg.communicationBlock.clock} is to early, delaying...");
- 	}
- 	else
- 	UseMessageOrdered(msg);     // Message ist ok, use it!
+	 if (!MessageAcceptable(msg))   //  delay until vc(x) <= m.vc(x) for all x
+	 {
+		 delayedMessages.PushItem(msg);   // Put message in queue
+		 Console.WriteLine($"    Message {msg.communicationBlock.clock} is to early, delaying...");
+	 }
+	 else
+		 UseMessageOrdered(msg);     // Message ist ok, use it!
  }
  else
  [...]
@@ -82,14 +82,15 @@ firstnumber=1,
 caption={Verarbeitung einer akzeptierten Nachricht.}]
 private void UseMessageOrdered(Message msg)
 {
-	Console.WriteLine($"    Message {msg.communicationBlock.clock} is ok! Using it.");
-	this.commLogic.clock.update(msg.communicationBlock.clock);
-	this.commLogic.appLogic.balance = msg.communicationBlock.payload.balance;
+	Console.WriteLine($"Message {msg.communicationBlock.clock} is ok! Using it.");
+	this.commLogic.appLogic.balance += msg.communicationBlock.payload.balance;
+	Console.WriteLine($" Balance in Msg: {msg.communicationBlock.payload.balance}");
 	if (this.commLogic.clock.getID() != msg.communicationBlock.clock.getID())
 	{
-		this.commLogic.IncreaseVectorClock(msg.communicationBlock.clock.getID());           // update control variable
+		this.commLogic.IncreaseVectorClock(msg.communicationBlock.clock.getID());
 		Console.WriteLine($"    Increased clock[{msg.communicationBlock.clock.getID()}]: {this.commLogic.clock}");
 	}
+	PrintCurrentValues();
 }
 \end{lstlisting}
 
