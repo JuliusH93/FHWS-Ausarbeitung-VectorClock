@@ -83,7 +83,75 @@ Dabei springt der Zähler vom Maximalwert auf Null.
 Wird dieses Schema implementiert kann bei manche Anwendungen darauf verzichtet werden die optimale Bitlänge der Vektorkomponenten zu bestimmen. Da lediglich ein geeigneter Auslöser für den Uhrenreset gefunden werden muss \cite{yen1997resetting}.
 Ein allgemeingültiges Verfahren wurde von Baldoni \cite{baldoni1998positive} vorgestellt.
 
+% cap:vectorclock
 \subsection{Gleichzeitig abgesendete Nachrichten}
+% Verteiltes System
+% Replika
+% Konsitenz  consistency 
+% Strong > Causal > Eventual 
+Wie bereits in der Einführung erwähnt, existiert kein globaler Zustand in einem verteilten System.
+Vielmehr wird die Vereinigung aller lokalen Zustände als globaler Zustand verstanden.
+Voraussetzung hierzu ist, dass alle Prozesse zu einem gewissen Zeitpunkt den selben lokalen Zustand haben.
+
+Konkret kann es sich bei einem globalen Zustand zum Beispiel um ein Datenfeld in einer verteilten Key-Value-Datenbank handeln.
+Jedes Datenfeld kann durch einen eindeutigen Schlüssel aus der Datenbank ausgelesen werden.
+Alle Prozesse halten eine Replikation dieser Schlüssel-Werte Paare.
+Durch die Kopie hat sich die Identität der Entität nicht geändert, das heißt obwohl eine Kopie gemacht wurde, handelt es sich immer noch um das selbe Objekt.
+
+Wird nun in einem Prozess dieses Datenfeld modifiziert, muss die Änderung allen anderen Prozessen bekannt gemacht werden, damit diese den neuen Wert annehmen können.
+Solange die Prozesse nach einer Datenänderung unterschiedliche Werte haben, ist das System inkonsistent, da je nachdem an welchem Prozess die Entität abgefragt wird, ein abweichender Wert zurück gegeben werden kann.
+Der Umgang mit Änderungen und der Tolerierung eines solchen Zeitfensters, indem das System inkonsistent ist, führt zu einer Klassifizierung nach Konsistenzmodelle.
+
+Es existieren eine Vielzahl an unterschiedlichen Modelle, die auf einer Skala von schwach nach strikt geordnet werden können.
+Bei strikter Konsistenz (engl. \qq{strong consistency}) sind alle Replika immer identisch. Dies wird erreicht indem jedes Replika in der selben Reihenfolge aktualisiert wird und die Aktualisierung atomar durchgeführt wird.
+
+Bei der Entwicklung einer verteilten Applikation aufbauend auf einer verteilten Datenbank mit strikter Konsistenz treten, im Vergleich zu einer herkömmlichen Datenbank, keine zusätzliche Schwierigkeiten auf.
+Durch die strikte Konsistenz können keine Dateninkonsistenzen auftreten, ähnlich einer herkömmlichen relationalen Datenbank.
+Gleichzeitig ist sie aber das teuerste Modell in der Umsetzung, da ein großer Kommunikationsaufwand betrieben werden muss.
+
+Schwache Konsistenz (engl. \qq{weak consistency}) fordert, dass jedes Replika zu irgendeinen Zeitpunkt alle Aktualisierungen erhalten wird, ohne Forderungen an der Reihenfolge zu stellen.
+Ein Applikation kann sich daher kaum auf die verteilte Datenbank verlassen, da durch die schwache Konsistenz kaum Versprechen über die Aktualität der Daten gemacht wird.
+So kann eine spätere Aktualisierung eine frühere überschreiben, wenn ihre Nachricht schneller zugestellt wurde als die konkurrierende Nachricht.
+
+Zwischen schwacher und strikter Konsistenz kann die sogenannte eventual consistency eingeordnet werden.
+Ähnlich zur schwachen Konsistenz werden hier keine Leseinkonsistenzen eliminiert, zwei direkt aufeinander folgende Leseoperationen könne zwei unterschiedliche Werte ausgeben.
+Es wird jedoch garantiert, dass sich das System stabilisieren und zu einem bestimmten Zeitpunkt alle Replika den selben Wert haben werden.
+Die Aktualisierungen können in einer anderen Reihenfolge von einem Prozess empfangen werden, als sie gesendet wurden.
+Der Prozess muss jedoch in der Lage sein die Aktualisierungen zu ordnen um den endgültigen Wert ohne Datenverlust zu bestimmen.
+
+Einige verteilte System fordern nur sehr schwache Konsistenzbedingungen.
+So ist die eventual consistency ein häufig implementiertes Konsistenzmodell.
+Ein Beispiel für eine verteilte Datenbank die nach eventual consistency arbeitet ist Dynamo von Amazon \cite{decandia2007dynamo}.
+Hier wird zu Gunsten der Geschwindigkeit auf eine strenge Konsistenz verzichtet.
+
+Amazon setzt in ihrer Dynamo Datenbank Vektoruhren ein, um die Aktualisierungen in ihrer korrekten Ordnungen anzuwenden, wie es von eventual consistency gefordert ist.
+Hierzu erhält jedes Objekt seine eigne Vektoruhr und fungiert als Version des Objekts.
+Wird ein Replika verändert, inkrementiert es die Vektoruhr des Datenfeldes und teilt alle anderen Replika die Werteänderung mit.
+Erhält ein Replika eine Aktualisierung zu der eine vorhergehende Aktualisierung noch nicht bei dem zu verarbeiteten Prozess angekommen ist, muss diese aufgeschoben werden.
+Durch die Vektoruhr kann in den meisten Fällen bestimmt werden, welche Schreiboperation zuvor durchgeführt wurde.
+In \fig{TODO} ist eine solche aufgeschobene Aktualisierung dargestellt.
+
+Es kann jedoch passieren, dass durch die Vektoruhr keine Reihenfolge zwischen zwei Aktualisierungen festgestellt werden konnte, nämlich genau dann wenn $e_1 \parallel e_2$ gilt.
+Diese nebenläufige Schreiboperationen, also Operationen die noch nicht abgeschlossen sind bevor Neue ausgeführt werden, stellen ein Problem für die eventual consistency dar.
+Um einen Datenverlust zu vermeiden muss entschieden werden, in welcher Reihenfolge die Schreiboperationen ausgeführt werden sollen.
+Die Schwierigkeit besteht jedoch darin, dass die Vektoruhr keine Aussage hierzu treffen kann.
+\fig{TODO} zeigt zwei gleichzeitig aufgetretene Schreiboperationen $e_1$ und $e_3$.
+Durch die Vektoruhren kann auf die Nebenläufigkeit $e_1 \parallel e_3$ getestet werden:
+\begin{align*}
+      C_3(e_3)[1] & \leq C_1(e_1)[1] & \wedge &  C_1(e_1)[3] & \leq C_3(e_3)[3] \\
+        3         & \leq 4           & \wedge & 0           & \leq 2
+\end{align*}
+
+Da es sich hierbei um eine wahre Aussage handelt gilt, dass $e_1$ und $e_2$ gleichzeitig aufgetreten sein müssen.
+Nun muss entschieden werden wie mit so einer Situation umgegangen wird.
+Da die Middelware, die in der Regel die Handhabung der Vektoruhr übernimmt, keinerlei Informationen über den Inhalt der Datenfelder oder generell über die kommunizierten Daten hat, kann sie nur den Konflikt an die Applikationsschicht melden und eine Auflösung des Konflikts anfordern.
+Wie die Applikation endgültig den Konflikt löst ist stark anwendungsabhängig und unterscheidet sich von Fall zu Fall.
+Eine einfache, jedoch mit Datenverlust behaftete Lösung ist es die letzte Schreiboperation zu übernehmen und die ältere zu verwerfen.
+
+Die Amazon Datenbank unterscheidet zwischen syntaktische und schematische Konflikte.
+Können die Operationen durch die Vektoruhren kausal geordnet werden, gilt der Konflikt als syntaktisch gelöst.
+Ist dies nicht möglich muss er schematisch gelöst werden, also durch die Applikationsschicht.
+
 
 \subsection{Aufheben alter Nachrichten}
 % http://stackoverflow.com/questions/21359184/what-do-matrix-clocks-solve-but-vector-clocks-cant

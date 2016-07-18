@@ -172,26 +172,143 @@ Ein solcher Algorithmus ist der Berkeley-Algorithmus. Dieser erfordert jedoch ei
 Es ist allgemein akzeptiert, dass eine globale physikalische Uhr für verteile System nicht tauglich ist. % TODO voll die Behauptung
 
 \subsubsection{Lamport Uhren}
+\label{cap:vectorclock}
 Leslie Lamport beschreibt in seinem Paper \cite{Lamport1978} von 1978, indem er gleichzeitig kausale Ordnung definiert, ein Verfahren um Prozesse durch logische Uhren zu synchronisieren.
 Sein vorgeschlagener Algorithmus ist heute als Lamport Uhr bekannt und stellt eine simple Möglichkeit dar, partielle kausale Ordnung in einem verteilen System herzustellen.
-Die Idee dahinter ist es, dass jeder Prozess einen eigenen Zähler, die Lamport Uhr, hält und bei Eintritt eines Ereignisses diese Zähler inkrementiert.
+Lamport führt den Begriff der logischen Zeit ein.
+Hierbei verläuft die logische Zeit diskret und schreitet nur voran, wenn ein Ereignis eintritt \cite{leon2013ereignisdiskrete}.
+Eine logische Uhr erfasst die logische Zeit indem bei eintritt eines Ereignisses ein Zähler inkrementiert wird.
+Dabei hält jeder Prozess einen eigenen Zähler.
 Sendet nun ein Prozess eine Nachricht, hängt er seinen aktuellen Zählerstand als Zeitstempel an die Nachricht an.
 Empfängt nun ein anderer Prozess eine Nachricht kann er anhand des Zeitstempels der Nachricht und seiner lokalen Uhr den kausalen Zusammenhang erschließen.
 
-Formall ist eine Lamportuhr durch eine Funktion definiert, welche einem Ereignis $e$ eine Nummer $C(e)$ zuweist.
-Die Uhrbedingung aus Abschnitt~\ref{cap:ordnung} wird erfüllt indem jeder Prozess $i$ seine eigene Uhr $C_i$ hält und nach folgenden Regel aktualisiert:
+Formal ist eine Lamportuhr $C$, wie alle logische Uhren, als eine Funktion definiert, welche einem Ereignis $e$ eine Nummer $C(e)$ zuweist.
+Lamportuhren erfüllen die Uhrbedinung aus Abschnitt~\ref{cap:ordnung} indem jeder Prozess $i$ seine eigene Uhr $C_i$ hält und nach folgenden Regel aktualisiert:
 \begin{itemize}
     \item Wenn $e_i^x$ kein Empfang-Ereignis ist, dann ist $C_i(e_i^x)=C_i(e_i^{x-1})+1$
     \item Ist $e_i^x$ ein Empfang-Ereignis der Nachricht $m$, dann ist $C_i(e_i^x)=\max\{C_i(e_i^{x-1}), C_j(e_j^y)  \} + 1$, wobei Prozess $j$ die Nachricht $m$ an $i$ geschickt hat und $C_j(e_j^y)$ der Uhrwert des Sende-Ereignis ist.
 \end{itemize}
 
+Abbildung~\ref{fig:lamportBsp} zeigt eine exemplarische Kommunikation zwischen drei Prozessen, dabei wird die Lamportuhr zum Zeitpunkt eines Ereignisses als Zahl in der Grafik dargestellt.
+Es ist einfach zu zeigen, dass Lamportuhren die Uhrbedingung erfüllen.
+Hierbei muss gezeigt werden, dass die aus der Uhrbedingung abgeleiteten Bedingungen erfüllt sind.
+Wird eine Nachricht versendet, muss die lokale Lamportuhr inkrementiert werden. 
+Daraus folgt, dass für zwei direkt aufeinander folgenden Sende-Ereignisse $e_i^x$ und $e_i^y$ wobei $e_i^x \rightarrow e_i^y$ gilt $C(e_i^x) < C(e_i^y)$, da bei Eintritt von $e_i^x$ die Uhr auf $a$ inkrementiert wurde und bei $e_i^y$ auf $a + 1$ erhöht werden musste.
+
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.80\textwidth]{LamportBeispiel.pdf}
     \caption[Exemplarische Kommunikation mit Lamport Uhr]{Kommunikation zwischen drei Prozessen unter Verwendung von Lamportuhren.}
+    Nachgezeichnet aus  \cite{landes2006dynamic}
     \label{fig:lamportBsp}
 \end{figure}
 
+Die zweite Bedingung fordert, dass für ein Sende-Ereignis $e_i^x$ die Uhr einen kleineren Wert als die des entsprechenden Empfangs-Ereignis $e_j^y$ besitzt.
+Durch die $\max$-Funktion wird zwischen der lokalen Uhr und der an die Nachricht angehängte Uhr entschieden.
+Hieraus entstehen zwei Fälle:
+Im ersten Fall ist der Zähler der lokalen Uhr größer als die der Nachricht, somit ist die Nachricht älter als der aktuelle Zustand und die lokale Uhr inkrementiert um Eins stellt den neuen Uhrenwert dar.
+Im zweiten Fall ist die Uhr der Nachricht größer als die lokale Uhr.
+Dem Empfänger sind also nicht alle Ereignisse des Sendeprozesses bekannt und hat somit einen älteren Stand.
+In diesem Fall wird die Uhr aus der Nachricht als neue Uhr übernommen und inkrementiert.
+In beiden Fällen gibt die Uhr für das Sende-Ereignis immer einen kleineren Wert als für das Empfangs-Ereignis an somit ist $C(e_i^x) < C(e_j^y)$ erfüllt.
+
+Lamportuhren haben jedoch einen entscheidenden Nachteil.
+Mit ihnen können keine Unterbrechungen erkannt werden.
+Da dies jedoch die Grundlage für kausaler und FIFO-Zustellung ist, sind Lamportuhren nicht dafür geeignet diese zu garantieren.
+Der Grund hierfür ist, dass keine Information über den Zustand der anderen Prozesse gespeichert wird.
+
+Haben zwei Ereignisse den selben Zählerstand müssen diese gleichzeitig aufgetreten sein.
+Ist also $C_i(e_i^x)=C_j(e_j^y)$ gegeben, folgt $e_i^x \parallel e_j^y$.
+Gilt jedoch $C_i(e_i^x)<C_j(e_j^y)$ ist es nicht möglich zu entscheiden ob $e_i^x \Rightarrow e_j^y$ oder $e_i^x \parallel e_j^y$ gilt.
+Die Uhr erlaubt es also nicht eine Aussage über die Reihenfolge der Ereignisse selbst zu machen.
+
+Lamportuhren sind dazu geeignet eine totale Ordnung im System herzustellen.
+Diese strikte Ordnung muss jedoch mit einer großen Anzahl an verschickten Nachrichten bezahlt werden, was wieder eine hohe Netzwerklast mit sich bringt.
+Es würde daher ausreichen, Ereignisse nach ihrem kausalen Zusammenhang zu ordnen.
+\fig{fig:LamportConcurrent} zeigt eine solche Situation, in der eine kausale Ordnung ausreichen würde, da das Empfangen von Nachricht $m_2$ nicht davon abhängt ob $m_2$ bereits empfangen wurde.
+Eine totale Ordnung würde jedoch dazu führen, dass $m_1$ und $m_2$ von jedem Prozess in der selben Reihenfolge empfangen werden.
+Ferner ist es nicht möglich ob das Versenden von $m_3$ vom Empfangen von $m_1$ oder $m_2$ abhängt \cite{tanenbaum2007distributed}.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.40\textwidth]{LamportConcurrent.png}
+    \caption[Lamportuhren und Kausalität]{Nebenläufige Nachrichtenübertragung unter Verwendung von Lamportuhren.}
+    Quelle: \cite{tanenbaum2007distributed}
+    \label{fig:LamportConcurrent}
+\end{figure}
+
+Mit Lamportuhren können Ereignisse somit nach ihren kausalen Abhängigkeiten geordnet werden.
+Es kann jedoch keine Aussage über die Abhängigkeiten selbst getroffen werden.
+So kann zum Beispiel nicht entschieden werden ob zwei Ereignisse in der kausalen Ordnung vertauscht werden können ohne die kausale Konsistenz zu zerstören.
+Hierzu müssen zusätzliche Informationen über die restlichen Prozesse gespeichert werden.
+
 % negativ Beispiel in Plausible Clocks Constant Size Logical Clocks for Distributed Systems
 \subsubsection{Vektor Uhren}
+Vektoruhren stellen eine Erweiterung der von Lamport vorgestellten Uhr dar und werden häufig eingesetzt um die Defizite der Lamportuhr zu beheben.
+Statt einem einzelnen skalaren Zeitstempel, verwenden Vektoruhren viele Zähler um die kausale Abhängigkeit zwischen Ereignisse umfänglicher zu erfassen, als dies mit Lamportuhren möglich wäre.
+Ihr Name wurde ihnen gegeben, da die Zeitstempel in einem Vektor zusammengefasst werden.
+Sie wurden zeitgleich von Mattern \cite{bibid} und Fidge \cite{bibid} vorgeschlagen und analysiert.
+
+Wie bei Lamportuhren verwaltet jeder Prozess seine eigne lokale Uhr.
+Die Uhr ist jedoch nun ein Vektor aus $n$ skalaren Werten, bei einem System bestehend aus $n$ Prozesse.
+Jede Komponente $C_i(e_i^x)[j]$ entspricht dem letzten Uhrenwert den Prozess $i$ zu Prozess $j$ zum Zeitpunkt $e_i^x$ kennt.
+Folgende Regeln müssen bei der Aktualisierung der Uhr eingehalten werden:
+\begin{itemize}
+    \item Wenn $e_i^x$ das Empfang-Ereignis der Nachricht $m$ ist, dann $C_i(e_i^x)=\max\{ C_i(e_i^{x-1}), C_j(e_j^y) \}$, wobei $C_j(e_j^y)$ der Uhrenvektor des Sende-Ereignisses von Prozess $j$ ist, welcher die Nachricht $m$ an Prozess $i$ gesendet hat. Das Maximum wird komponentenweise bestimmt.
+    \item Wenn $e_i^x$ ein beliebiges Ereignis ist, dann muss der Prozess seine Vektorkomponente inkrementiert: $C_i(e_i^x)[i]=C_i(e_i^{x-1})[i] + 1$. Dies beinhaltet auch Empfang-Ereignisse.
+\end{itemize}
+
+\fig{fig:VektorBsp} zeigt den selben Kommunikationsverlauf wie \fig{fig:lamportBsp} jedoch mit der Verwendung von Vektoruhren statt Lamportuhren.
+Anschaulich betrachtet ist $\Cieix[i]$ gleich der Anzahl der von Prozess $i$ ausgeführten Ereignisse (inklusive $\eix$) zum Zeitpunkt von $\eix$ bereits ausgeführt hat.
+Nach der selben Logik gibt $\Cieix[j]$ die Anzahl der Ereignisse von Prozess $i$ an, die vor $\eix$ eingetreten sind.
+
+Der große Vorteil von Vektoruhren ist, dass sie nicht nur die Uhrenbedingung erfüllen sondern auch eine strengere Variation, nämlich die starke Uhrenbedingung:
+\begin{equation*}
+\forall e_i^x, e_j^y \in E \colon C(e_i^x) < C(e_j^y) \text{ genau dann, wenn } e_i^x \Rightarrow e_j^y
+\end{equation*}
+
+Bei Lamportuhren, welche nur die schwache Uhrenbedingung erfüllen, ist die Aussage $C_i(e_i^x)<C_j(e_j^y)$ doppeldeutig. 
+Es kann nicht zwischen $e_i^x \Rightarrow e_j^y$ oder $e_i^x \parallel e_j^y$ unterschieden werden.
+Bei Uhren die jedoch die starke Uhrenbedingung erfüllen, wie Vektoruhren, lässt die selbe Aussage nur den Schluss zu, dass $e_i^x \Rightarrow e_j^y$ gelten muss.
+Somit wurde die Schwäche von Lamportuhren eliminiert.
+
+Damit die starke Uhrenbedingung von Vektoruhren erfüllt werden kann, muss zuerst die $<$-Relation von Vektoruhren definiert werden:
+\begin{align*}
+\Cieix &< \Cjejy \text{ genau dann, wenn} \\
+       & \Cieix \ne \Cjejy \text{ und } \\
+       & \forall k | 1 \leq k \leq n \colon \Cieix[k] \leq \Cjejy[k].
+\end{align*}
+
+Nun kann anhand einer Vektoruhr entscheiden werden ob ein Ereignis kausal abhängig von einem Anderen ist:
+\begin{equation*}
+    \eix \Rightarrow \ejy \text{ genau dann, wenn } \Cieix[i] \leq \Cjejy[i].
+\end{equation*}
+
+Hervorzuheben ist, dass nur eine einzige skalare Operation notwendig ist, um diesen Zusammenhang zu erschließen.
+Ferner ist die obige Formel nicht symmetrisch.
+Wird sie angewendet und ergibt $\eix \centernot\Rightarrow \ejy$, muss sie ein zweites Mal angewendet werden um zwischen $\ejy \Rightarrow \eix$ oder $\eix \parallel \ejy$ zu entscheiden.
+Dies führt zu dem Nebenläufigkeitstest:
+\begin{align*}
+    \eix \parallel & \ejy \text{ genau dann, wenn } \\
+                   & \Cjejy[i] \le \Cieix[i] \text{ und } \\
+                   & \Cieix[j] \le \Cjejy[j].
+\end{align*}
+
+Ergibt der Test $\eix \centernot\parallel \ejy$ kann direkt anhand des nicht erfüllten Terms der beiden Bedingungen entschieden werden ob $\eix \Rightarrow \ejy$ oder $\ejy \Rightarrow \eix$ gilt.
+
+Der große Nachteil von Vektoruhren besteht darin, dass ein fixer Index verwendet wird, um die Komponenten im Vektor auszuwählen die den skalaren Uhrenwert eines Prozesses darstellt.
+Dies führt zu zwei sehr einschränkenden Voraussetzungen.
+Zum einen muss die Anzahl der Prozesse konstant und zum anderen auch im Voraus bekannt sein.
+In dynamischen System stellen diese beiden Einschränkungen ein ernstes Problem dar, da die Anzahl in solchen System nicht einfach zu bestimmen ist, was in der Natur der Sache liegt \cite{landes2006dynamic}.
+
+% TODO Zeichnung ist noch von Lamport
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.80\textwidth]{LamportBeispiel.pdf}
+    \caption[Exemplarische Kommunikation mit Vektoruhren]{Kommunikation zwischen drei Prozessen unter Verwendung von Vektoruhren.}
+    Nachgezeichnet aus  \cite{landes2006dynamic}
+    \label{fig:VektorBsp}
+\end{figure}
+
+
 \subsubsection{Interval Tree Uhren}
