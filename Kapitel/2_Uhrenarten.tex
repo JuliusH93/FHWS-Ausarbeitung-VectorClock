@@ -171,7 +171,7 @@ Dieser Abweichung einzelner Uhren kann durch geeigneter Algorithmen entgegnet we
 Ein solcher Algorithmus ist der Berkeley-Algorithmus. Dieser erfordert jedoch einen globalen Zeitgeber.
 Es ist allgemein akzeptiert, dass eine globale physikalische Uhr für verteile System nicht tauglich ist. % TODO voll die Behauptung
 
-\subsubsection{Lamport Uhren}
+\subsubsection{Lamport-Uhren}
 \label{cap:vectorclock}
 Leslie Lamport beschreibt in seinem Paper \cite{Lamport1978} von 1978, indem er gleichzeitig kausale Ordnung definiert, ein Verfahren um Prozesse durch logische Uhren zu synchronisieren.
 Sein vorgeschlagener Algorithmus ist heute als Lamport Uhr bekannt und stellt eine simple Möglichkeit dar, partielle kausale Ordnung in einem verteilen System herzustellen.
@@ -243,7 +243,7 @@ So kann zum Beispiel nicht entschieden werden ob zwei Ereignisse in der kausalen
 Hierzu müssen zusätzliche Informationen über die restlichen Prozesse gespeichert werden.
 
 % negativ Beispiel in Plausible Clocks Constant Size Logical Clocks for Distributed Systems
-\subsubsection{Vektor Uhren}
+\subsubsection{Vektoruhren}
 Vektoruhren stellen eine Erweiterung der von Lamport vorgestellten Uhr dar und werden häufig eingesetzt um die Defizite der Lamportuhr zu beheben.
 Statt einem einzelnen skalaren Zeitstempel, verwenden Vektoruhren viele Zähler um die kausale Abhängigkeit zwischen Ereignisse umfänglicher zu erfassen, als dies mit Lamportuhren möglich wäre.
 Ihr Name wurde ihnen gegeben, da die Zeitstempel in einem Vektor zusammengefasst werden.
@@ -301,14 +301,77 @@ Dies führt zu zwei sehr einschränkenden Voraussetzungen.
 Zum einen muss die Anzahl der Prozesse konstant und zum anderen auch im Voraus bekannt sein.
 In dynamischen System stellen diese beiden Einschränkungen ein ernstes Problem dar, da die Anzahl in solchen System nicht einfach zu bestimmen ist, was in der Natur der Sache liegt \cite{landes2006dynamic}.
 
-% TODO Zeichnung ist noch von Lamport
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.80\textwidth]{LamportBeispiel.pdf}
+    \includegraphics[width=0.80\textwidth]{VektorBeispiel.pdf}
     \caption[Exemplarische Kommunikation mit Vektoruhren]{Kommunikation zwischen drei Prozessen unter Verwendung von Vektoruhren.}
     Nachgezeichnet aus  \cite{landes2006dynamic}
     \label{fig:VektorBsp}
 \end{figure}
 
 
-\subsubsection{Interval Tree Uhren}
+\subsubsection{Interval Tree Clocks}
+Vektoruhren haben den großen Nachteil für dynamischen Systeme eher ungeeignet zu sein.
+Daher ist es interessant entsprechende neue Verfahren zu untersuchen, welche die Defizite von Vektoruhren in einem solchen Kontext ausmerzen.
+Interval Tree Clocks (ITC) stellen ein solches Verfahren dar und wurden 2008 von \etal{Almeida} in ihrer Arbeit \qq{Interval Tree Clocks: A Logical Clock for Dynamic Systems} \cite{almeida2008treeclocks} vorgeschlagen.
+Wie bereits angedeutet, sind ITCs besonders für dynamische Systeme geeignet, in denen häufig Prozesse gestartet und terminiert werden.
+Während Vektoruhren eine globale ID benötigen, nämlich den Index der Vektorkomponente, kommen ITCs ohne solcher globalen eindeutigen IDs aus. Dies ermöglicht eine gänzlich dezentrale Erzeugung von Prozessen \cite{almeida2008treeclocks}.
+
+Interval Tree Clocks haben eine in der Größe variable Darstellung, welche sich automatisch an der Anzahl der existierenden Prozesse richtet. Die Größe der Uhren nimmt zu und ab entsprechend der im System aktiven Prozesse.
+Um dies zu erreichen setzten ITCs auf dem \qq{Fork-Event-Join}-Modell auf.
+Hierbei handelt es sich um ein Modell bei dem die Kausalität durch drei grundlegende Operationen beschrieben werden kann.
+Diese Operationen, fork, event und join, werden auf die Zeitstempel der Uhr angewendet.
+Bei ITCs besteht ein Zeitstempel aus dem Paar $(i,e)$ bestehend aus einer ID $i$ und der Ereigniskomponente $e$, welche die kausal bekannte Ereignisse enthält.
+
+Durch die fork-Operation kann die vergangenen kausale Zusammenhänge eines Zeitstempel geklont werden.
+Dies führt dazu, dass zwei neue Paare entstehen mit der selben Ereigniskomponente, jedoch mit unterschiedlichen IDs.
+Neue Ereignisse können durch die event-Operation zu der Ereigniskomponente hinzugefügt werden. 
+Hierbei wird die partielle Ordnung der Ereignisse eingehalten.
+Mit der join-Operation kann ein neuer Zeitstempel durch Zusammenfassung zweier Stempel erzeugt werden.
+
+Mit diesen Basisoperationen lassen sich nun die klassischen Operationen send, receive und sync beschreiben.
+Eine send-Operation ist die atomare Verkettung von event und fork.
+Bei Vektoruhren entspricht dies dem Inkrementieren des lokalen Zählers und dem erzeugen einer Nachricht.
+Receive wird ebenfalls durch die atomare Verkettung von join gefolgt von event beschrieben.
+Analog hierzu muss bei Vektoruhren das komponentenweise Maximum bestimmt werden und der lokale Zähler inkrementiert werden.
+Wieder durch eine atomare Verkettung kann die sync-Operation durch join und fork modelliert werden.
+
+Der Unterschied zwischen Vektoruhren und ITCs wird besonders deutlich, wenn die IDs als Funktion betrachtet werden.
+Während die global eindeutige IDs von Vektoruhren einer konstanten vordefinierten Funktion entspricht, wird die ID Komponente der ITCs entsprechend der Prozessanzahl modifiziert.
+Während bei klassischen Verfahren diskrete Funktionen verwendet werden, basieren ITCs auf kontinuierliche Funktionen über die Menge $\mathbb{R}$, beschränkt auf das Intervall $[0;1[$.
+Dieser Bereich kann in eine beliebige Anzahl an Subintervallen geteilt werden.
+
+Die Idee hinter Interval Tree Clocks ist es nun jedem Prozess eine Menge von Intervalle zur Verfügung zustellen, welche verwendet werden können um die Ereigniskomponente zu erweitern.
+Diese werden bei einer fork-Operation an die beiden Nachfolger weitergegeben und bei einer join-Operation wieder zusammengeführt.
+Jedes Subintervall wird durch aufeinanderfolgend Teilungen des Intervalls $[0;1[$ in gleich große Intervalle erzeugt.
+Diese Zusammenhänge lassen sich effizient als binärer Baum darstellen.
+\etal{Almeida} stellen eine geeignete binäre Kodierung der ITCs in ihrer Arbeit vor \cite{almeida2008treeclocks}.
+
+\fig{fig:itcBsp} zeigt die Veränderung der ITCs im Laufe der Zeit unter Verwendung des Fork-Join-Event-Modell.
+Die Kommunikation, im dargestellten Beispiel, beginnt mit einem Prozesse, welcher einen \qq{Seed}-Zeitstempel hält.
+ITCs lassen sich als Funktion beschreiben und somit plotten.
+Die in der Grafik zu sehende Rechtecke stellen die Graphen der ITCs Funktionen dar.
+Dieser wird in zwei Uhren geteilt, es sind nun zwei Prozesse aktiv.
+Für einen der beide Prozesse wird ein Ereignis ausgelöst, für den Anderen zwei.
+Dies ist durch die Stapelung der Graphen angedeutet.
+Nun wird wieder ein fork ausgeführt. Dies führt dazu, dass drei Prozesse aktiv sind.
+Anschließend werden zwei Prozesse zusammenführt, um anschließend direkt wieder geteilt zu werden.
+Zum Ende werden zwei Prozesse wieder zusammengeführt.
+
+Interval Tree Clocks können somit effizienter in dynamische Systeme verwaltet werden, als zum Beispiel Vektoruhren.
+Sie wurden im Hinblick auf die häufige Erstellung und Terminierung von Prozessen, wie es in heutigen Systemen in der Regel der Fall ist, entwickelt.
+Dabei wird der dynamische Charakter solcher Systeme in der dynamischen Aufteilung der Intervalle der ITCs widergespiegelt.
+Fernen kann auf globale eindeutige IDs verzichtet werden, was im Allgemeinen eine große Vereinfachung des Systems darstellt.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=1\textwidth]{ITCBeispiel.png}
+    \caption[Fork-Join-Event-Modell von Interval Tree Clocks]{Grafische Darstellung des Fork-Join-Event Modells bei Verwendung von Interval Tree Clocks in einem dynamischen System.}
+    Quelle: \cite{almeida2008treeclocks}
+    \label{fig:itcBsp}
+\end{figure} 
+
+
+
+
+

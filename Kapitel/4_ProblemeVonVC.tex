@@ -1,5 +1,5 @@
 \section{Schwierigkeiten von Vektoruhren}
-\subsection{Effizienten Speicherung der Vektoruhren}
+\subsection{Effizienten Speicherung von Vektoruhren}
 % Paper: Concerning the size of clocks 
 %        Plausible Clocks Constant Size Logical Clocks for Distributed Systems
 Vektor Uhren sind eine relativ einfache und effektive Lösung kausale Ordnung in einem verteilten System herzustellen.
@@ -154,13 +154,11 @@ Ist dies nicht möglich muss er schematisch gelöst werden, also durch die Appli
 
 
 \subsection{Aufheben alter Nachrichten}
+% 1. Ereignisse müssen alle Prozesse mitgeteilt werden. Nachrichten müssen solange aufgehoben werden, bis alle die Nachricht erhalten haben. Anhand von Nachrichten der anderen Prozessen kann mit deren Vektorclock entschieden werden welche Nachrichten sie von einem selbst schon haben
+% 2. Nachrichten müssen für eventual Consitiency aufgehoben werden. Daei kann es passieren, dass eine Nachricht rein kommt die bereits die alten Zustände enthält und somit die alten Nachrichten obsolete.
+% 3. Matrix Clock 'fire and forget'
 % http://stackoverflow.com/questions/21359184/what-do-matrix-clocks-solve-but-vector-clocks-cant
 % Voraussetzung: eventual consistency
 % Zeigen Ohne Matrix würde es nicht gehen
 % Matrix Uhren ermöglichen GC
-
-
-%https://aphyr.com/posts/285-call-me-maybe-riak
-%If we enable allow-mult in Riak, the vector clock algorithms will present both versions to the client. We can combine those objects together using a merge function. If the merge function is associative, commutative, and idempotent over that type of object, we can guarantee that it always converges to the same value regardless of the order of writes. If the merge function doesn’t discard data (like last-write-wins does), then it will preserve writes from both sides.
-
 
