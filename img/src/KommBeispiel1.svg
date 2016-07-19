@@ -15,7 +15,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="KommBeispiel.svg">
+   sodipodi:docname="KommBeispiel1.svg">
   <defs
      id="defs4">
     <marker
@@ -187,9 +187,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4142136"
-     inkscape:cx="198.11706"
-     inkscape:cy="975.69322"
+     inkscape:zoom="2.8284272"
+     inkscape:cx="212.18607"
+     inkscape:cy="884.57046"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -206,8 +206,8 @@
      inkscape:snap-smooth-nodes="false"
      inkscape:snap-midpoints="false"
      inkscape:bbox-paths="false"
-     inkscape:window-width="1366"
-     inkscape:window-height="705"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1">
@@ -830,58 +830,5 @@
              id="tspan6831-3-8" /></text>
       </g>
     </g>
-    <rect
-       style="fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0"
-       id="rect6833-4-3"
-       width="50"
-       height="17.5"
-       x="200"
-       y="234.86221" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:12.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       x="205.3277"
-       y="249.26221"
-       id="text6827-5-9"
-       sodipodi:linespacing="125%"><tspan
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Latin Modern Math';-inkscape-font-specification:'Latin Modern Math'"
-         sodipodi:role="line"
-         id="tspan6829-6-39"
-         x="205.3277"
-         y="249.26221">(-,-,-)</tspan><tspan
-         sodipodi:role="line"
-         x="205.3277"
-         y="264.88721"
-         id="tspan6831-6-7" /></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:12.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       x="240"
-       y="252.36221"
-       id="text6504"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan6506"
-         x="240"
-         y="252.36221"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Latin Modern Math';-inkscape-font-specification:'Latin Modern Math'">Lokale Uhr</tspan></text>
-    <circle
-       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       id="path7594-42-6"
-       cx="350"
-       cy="247.76602"
-       r="2.5" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:12.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="360"
-       y="252.36221"
-       id="text6557"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan6559"
-         x="360"
-         y="252.36221"
-         style="-inkscape-font-specification:'Latin Modern Math';font-family:'Latin Modern Math';font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal">Event</tspan></text>
   </g>
 </svg>
