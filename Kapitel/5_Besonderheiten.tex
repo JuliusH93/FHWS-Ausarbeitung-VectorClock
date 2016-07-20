@@ -82,8 +82,8 @@ firstnumber=1,
 caption={Verarbeitung einer akzeptierten Nachricht.}]
 private void UseMessageOrdered(Message msg)
 {
-	Console.WriteLine($"Message {msg.communicationBlock.clock} is ok! Using it.");
-	this.commLogic.appLogic.balance += msg.communicationBlock.payload.balance;
+	Console.WriteLine($" Message {msg.communicationBlock.clock} is ok!");
+	this.commLogic.appLogic.UpdateBalance(msg.communicationBlock.payload.balance);
 	Console.WriteLine($" Balance in Msg: {msg.communicationBlock.payload.balance}");
 	if (this.commLogic.clock.getID() != msg.communicationBlock.clock.getID())
 	{
