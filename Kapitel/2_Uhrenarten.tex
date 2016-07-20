@@ -185,8 +185,8 @@ Empfängt nun ein anderer Prozess eine Nachricht kann er anhand des Zeitstempels
 Formal ist eine Lamportuhr $C$, wie alle logische Uhren, als eine Funktion definiert, welche einem Ereignis $e$ eine Nummer $C(e)$ zuweist.
 Lamportuhren erfüllen die Uhrbedinung aus Abschnitt~\ref{cap:ordnung} indem jeder Prozess $i$ seine eigene Uhr $C_i$ hält und nach folgenden Regel aktualisiert:
 \begin{itemize}
-    \item Wenn $e_i^x$ kein Empfang-Ereignis ist, dann ist $C_i(e_i^x)=C_i(e_i^{x-1})+1$
-    \item Ist $e_i^x$ ein Empfang-Ereignis der Nachricht $m$, dann ist $C_i(e_i^x)=\max\{C_i(e_i^{x-1}), C_j(e_j^y)  \} + 1$, wobei Prozess $j$ die Nachricht $m$ an $i$ geschickt hat und $C_j(e_j^y)$ der Uhrwert des Sende-Ereignis ist.
+    \item Wenn $e_i^x$ kein Empfang-Ereignis ist, dann ist $C_i(e_i^x):=C_i(e_i^{x-1})+1$
+    \item Ist $e_i^x$ ein Empfang-Ereignis der Nachricht $m$, dann ist $C_i(e_i^x):=\max\{C_i(e_i^{x-1}), C_j(e_j^y)  \} + 1$, wobei Prozess $j$ die Nachricht $m$ an $i$ geschickt hat und $C_j(e_j^y)$ der Uhrwert des Sende-Ereignis ist.
 \end{itemize}
 
 Abbildung~\ref{fig:lamportBsp} zeigt eine exemplarische Kommunikation zwischen drei Prozessen, dabei wird die Lamportuhr zum Zeitpunkt eines Ereignisses als Zahl in der Grafik dargestellt.
@@ -254,8 +254,8 @@ Die Uhr ist jedoch nun ein Vektor aus $n$ skalaren Werten, bei einem System best
 Jede Komponente $C_i(e_i^x)[j]$ entspricht dem letzten Uhrenwert den Prozess $i$ zu Prozess $j$ zum Zeitpunkt $e_i^x$ kennt.
 Folgende Regeln müssen bei der Aktualisierung der Uhr eingehalten werden:
 \begin{itemize}
-    \item Wenn $e_i^x$ das Empfang-Ereignis der Nachricht $m$ ist, dann $C_i(e_i^x)=\max\{ C_i(e_i^{x-1}), C_j(e_j^y) \}$, wobei $C_j(e_j^y)$ der Uhrenvektor des Sende-Ereignisses von Prozess $j$ ist, welcher die Nachricht $m$ an Prozess $i$ gesendet hat. Das Maximum wird komponentenweise bestimmt.
-    \item Wenn $e_i^x$ ein beliebiges Ereignis ist, dann muss der Prozess seine Vektorkomponente inkrementiert: $C_i(e_i^x)[i]=C_i(e_i^{x-1})[i] + 1$. Dies beinhaltet auch Empfang-Ereignisse.
+    \item Wenn $e_i^x$ das Empfang-Ereignis der Nachricht $m$ ist, dann $C_i(e_i^x):=\max\{ C_i(e_i^{x-1}), C_j(e_j^y) \}$, wobei $C_j(e_j^y)$ der Uhrenvektor des Sende-Ereignisses von Prozess $j$ ist, welcher die Nachricht $m$ an Prozess $i$ gesendet hat. Das Maximum wird komponentenweise bestimmt.
+    \item Wenn $e_i^x$ ein beliebiges Ereignis ist, dann muss der Prozess seine Vektorkomponente inkrementiert: $C_i(e_i^x)[i]:=C_i(e_i^{x-1})[i] + 1$. Dies beinhaltet auch Empfang-Ereignisse.
 \end{itemize}
 
 \fig{fig:VektorBsp} zeigt den selben Kommunikationsverlauf wie \fig{fig:lamportBsp} jedoch mit der Verwendung von Vektoruhren statt Lamportuhren.
