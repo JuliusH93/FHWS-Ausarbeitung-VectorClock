@@ -130,7 +130,15 @@ Hierzu erhält jedes Objekt seine eigne Vektoruhr und fungiert als Version des O
 Wird ein Replika verändert, inkrementiert es die Vektoruhr des Datenfeldes und teilt alle anderen Replika die Werteänderung mit.
 Erhält ein Replika eine Aktualisierung zu der eine vorhergehende Aktualisierung noch nicht bei dem zu verarbeiteten Prozess angekommen ist, muss diese aufgeschoben werden.
 Durch die Vektoruhr kann in den meisten Fällen bestimmt werden, welche Schreiboperation zuvor durchgeführt wurde.
-In \fig{TODO} ist eine solche aufgeschobene Aktualisierung dargestellt.
+In \fig{fig:vecConcurrent} ist eine solche aufgeschobene Aktualisierung dargestellt.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=1\textwidth]{VektorConcurr.pdf}
+    \caption[Aufheben von Nachrichten]{Grafische Darstellung des Fork-Join-Event Modells bei Verwendung von Interval Tree Clocks in einem dynamischen System.}
+    \label{fig:vecConcurrent}
+\end{figure} 
+
 
 Es kann jedoch passieren, dass durch die Vektoruhr keine Reihenfolge zwischen zwei Aktualisierungen festgestellt werden konnte, nämlich genau dann wenn $e_1 \parallel e_2$ gilt.
 Diese nebenläufige Schreiboperationen, also Operationen die noch nicht abgeschlossen sind bevor Neue ausgeführt werden, stellen ein Problem für die eventual consistency dar.
@@ -139,8 +147,8 @@ Die Schwierigkeit besteht jedoch darin, dass die Vektoruhr keine Aussage hierzu 
 \fig{TODO} zeigt zwei gleichzeitig aufgetretene Schreiboperationen $e_1$ und $e_3$.
 Durch die Vektoruhren kann auf die Nebenläufigkeit $e_1 \parallel e_3$ getestet werden:
 \begin{align*}
-      C_3(e_3)[1] & \leq C_1(e_1)[1] & \wedge &  C_1(e_1)[3] & \leq C_3(e_3)[3] \\
-        3         & \leq 4           & \wedge & 0           & \leq 2
+      C_3(e_3)[1] & \leq C_1(e_1)[1] & \wedge & & C_1(e_1)[3] & \leq C_3(e_3)[3] \\
+        3         & \leq 4           & \wedge & & 0           & \leq 2
 \end{align*}
 
 Da es sich hierbei um eine wahre Aussage handelt gilt, dass $e_1$ und $e_2$ gleichzeitig aufgetreten sein müssen.
@@ -162,4 +170,89 @@ Ist dies nicht möglich muss er schematisch gelöst werden, also durch die Appli
 % Voraussetzung: eventual consistency
 % Zeigen Ohne Matrix würde es nicht gehen
 % Matrix Uhren ermöglichen GC
+Anhand Vektoruhren kann entschieden werden, wann zwischengespeicherte Nachrichten gelöscht werden können.
+Hierzu gibt es drei potentielle Situationen in denen, entschieden werden muss wann etwas sicher gelöscht werden kann.
+Für die ersten Beiden können Vektoruhren angewendet werden und für die letzte muss eine Erweiterung von Vektoruhren heran gezogen werden.
+
+Eine Situation in der alte Nachrichten aufgehoben werden müssen, ist gegeben wenn ein Prozess seine versandet Nachrichten aufheben muss für den Fall, dass sie neu angefordert werden.
+Andere Prozesse könnten unter gewissen Umständen Nachrichten erneut anfordern, wenn diese auf die Nachricht warten.
+Eine andere Möglichkeit ist es, dass eine Synchronisation der Uhren angefordert wurde und die Prozesse sich versuchen anzugleichen.
+Hierzu wird jede versandte Nachricht gespeichert, inklusive der Vektoruhr zum Zeitpunkt des Versendens.
+Damit der Speicherbedarf nicht ins Unendliche wächst, müssen gespeicherte Nachrichten auch wieder gelöscht werden.
+Dazu muss jedoch bekannt sein, welche Nachrichten gelöscht werden können ohne einen Datenverlust zu verursachen.
+
+Eine Möglichkeit ist es, die Vektoruhren der eingehenden Nachrichten mit den Uhren der gespeicherten Nachrichten zu vergleichen.
+Erhält der Prozess eine Vektoruhr eines anderen Prozesses indem seine Vektorkomponente größer oder gleich die der gespeicherten Nachricht ist, muss der andere Prozess die alten Nachricht bekommen und verarbeitet haben.
+Dies ist durch die Updatevorschriften der Vektoruhr immer gegeben.
+
+Verschickt der Prozess $i$ zu einem gegebenen Zeitpunkt $x$ seine Nachricht und speichert diese, muss der Empfänger $j$ das Maximum zwischen seiner lokalen Uhr und der Uhr aus der Nachricht für die Komponente des Prozesses $i$ nehmen.
+Nun kann der Wert in der Nachricht das Maximum sein.
+In diesem Fall wird der Zeitpunkt $x$ in die lokale Uhr übernommen.
+Andernfalls hat der Empfänger bereits aktuellere Nachrichten von $i$ empfangen und seine lokale Vektoruhr erhält einen Wert $>x$.
+
+In jedem Fall wird die zu dem Senderprozess zugehörige Komponente der Vektoruhr einen größeren oder gleichen Wert haben als die gesendete Nachricht.
+Schickt nun der Empfänger seinerseits eine Nachricht an den ursprünglichen Sender $i$ muss er seine lokale Vektoruhr mit anfügen.
+Anhand dieser kann der Prozess $i$ bestimmen, welche Nachrichten bereits von $j$ verarbeitet wurden, nämlich alle die kleiner oder gleich der Vektoruhr von $j$ für die $i$-te Komponente sind.
+
+Dieses Vorgehen funktioniert auch indirekt zwischen mehr als zwei Prozessen.
+\fig{TODO} zeigt eine solche Situation.
+Prozess $p_0$ sendet zwei Nachricht $m_1$ und $m_2$ an $p_1$.
+Anschließend schickt $p_1$ eine Nachricht $m_2$ an $p_3$.
+Zu diesem Zeitpunkt kennt $p_3$ den aktuellsten Stand von $p_2$ und auch $p_1$, da diese zum Zeitpunkt des Verschickens von $m_2$ von $p_2$ bekannt war.
+Schickt nun $p_3$ eine Nachricht an Prozess $p_1$, kann dieser aus der Vektoruhr erschließen, dass $p_3$ die Information von Nachricht $m_1$ erhalten hat.
+Sendet nun $p_2$ noch eine Nachricht an $p_1$, kann $p_1$ erkennen, dass alle im Prozess den aktuellen Zustand kennt.
+Somit kann $p_1$ die gespeicherten Nachrichten $m_1$ und $m_2$ verwerfen, da das gesamte System sie bereits erhalten hat.
+
+% TODO figure
+
+Eine zweite Situation in der alte Nachrichten, diesmal auf der Empfängerseite, gespeichert werden, ergibt sich wenn die Auslieferung der Nachrichten kausal geordnet erfolgen soll.
+Dies ist zum Beispiel der Fall bei eventual consistency, da Aktualisierungen in der selben Reihenfolge angewendet werden muss in der sie aufgetreten sind.
+Sendet nun ein Prozess $p_1$ Nachrichten an einen Prozess $p_2$, können diese in beliebiger Reihenfolge bei $p_2$ ankommen, dürfen jedoch nur in der Sendereihenfolge an die Applikation übertragen werden.
+
+Nachrichten die außerhalb der Reihenfolge angekommen sind, müssen solange gespeichert werden bis die erwartete Nachricht ankommt.
+Dies kann auch Nachrichten von einem dritten Prozess betreffen, da diese kausal von den restlichen Nachrichten abhängen können.
+Sobald die erwartete Nachricht eingetroffen ist, kann diese zugestellt werden und alle gespeicherten Nachrichten die nun in der Reihenfolge als nächstes kommen.
+
+Die gespeicherten Nachrichten werden in der Regel in einer Prioritätswarteschlange (engl. \qq{priority queue}) gespeichert.
+Diese ist nach den Vektoruhren der Nachrichten sortiert und ermöglicht einen effizienten Zugriff auf die gespeicherten Nachrichten.
+
+Im Allgemeinem muss die Anwendung entscheiden, wie sie auf den Inhalt der Nachrichten reagiert.
+Damit die Anwendung richtig entscheiden kann, müssen alle Nachrichten zugestellt werden.
+Ist dies nicht gegeben, ist nicht garantiert, dass die Anwendung in jeden Fall korrekt funktioniert.
+Es gibt jedoch Anwendungsfälle, wie zum Beispiel verteilte Datenbanken, bei denen nur die letzte Aktualisierung von Relevanz ist.
+In diesem Fall können alle gespeicherten Nachrichten verworfen werden, wenn eine aktuellere Nachricht empfangen wurde.
+Dies stellt eine mögliche Optimierung dar, da nicht alle Nachrichten sondern nur eine, die Aktuellste, der Anwendung gemeldet werden muss.
+
+\fig{TODO} zeigt eine Situation in der die zu erst verschickte Nachricht $m_1$ von $p_1$ von den beiden Nachrichten $m_2$ und $m_3$ überholt wurde und somit als letztes bei $p_2$ angekommen ist.
+Eine Möglichkeit ist es nun, dass $p_2$ die Nachrichten $m_2$ und $m_3$ bis zum Empfangen von $m_1$ aufhebt und die Nachrichten in der korrekten Reihenfolge der Anwendung zustellt.
+Alternativ könnte $p_2$ aber auch beim Empfangen von $m_2$ und $m_3$ diese direkt Zustellen und $m_1$ verwerfen, da bereits aktuellere Nachrichten empfangen wurden und der Inhalt von $m_1$ bereits bekannt oder obsolete ist.
+
+% TODO figure
+
+Der letzte Anwendungsfall ist Garbage Collection innerhalb des verteilten Systems.
+Angenommen ein Prozess möchte eine Nachricht verschicken und deren Information sofort wieder verwerfen.
+Natürlich darf die Information nur gelöscht werden, wenn alle Prozesse diese erhalten haben.
+Dabei soll es keine Rolle spielen ob die Information direkt an alle Prozesse oder auch über Umwege indirekt verteilt wird.
+Hierzu müsste der Prozess die Vektoruhren der anderen Prozesse kennen.
+Dies verhält sich ähnlich zu dem ersten beschriebenen Anwendungsfall.
+
+Ein Lösung für dieses Problem stellen Matrixuhren dar.
+Vektoruhren können als Wissenstand interpretiert werden.
+$VC_a(x)[i]$ beschreibt was der Prozess $a$ über den Prozess $i$ weiß, zu dem Zeitpunkt als $e$ eingetreten ist.
+Es liegt nahe dieses Wissen über andere Prozesse leicht erweitert werden kann, indem eine höher dimensionale Struktur verwendet wird.
+So kann der Vektor zu einer Matrix erweitert werden und als Liste von Vektoren betrachtet werden.
+Durch $MC_a(x)[i,j]$ kann der Prozess $a$ erfahren, was der Prozess $i$ über Prozess $j$ weiß, zum Zeitpunkt $e$.
+Diese Erweiterung wird nach ihrer Struktur als Matrixuhr bezeichnet.
+Gilt nun zum Beispiel für alle $i$ das $MC_j(e)[i, j] > k$, kann nun der Prozess $j$ erschließen, dass jedem Prozess bekannt ist, dass sein aktueller Zustand größer $k$ ist.
+Die Updateregeln von Matrixuhren verhalten sich ähnlich zu denen von Vektoruhren \cite{garg2005concurrent}.
+
+In unserem oben gegebenen Szenario können nun Matrixuhren sinnvoll eingesetzt werden.
+Angenommen die Nachricht wurde zu dem Zeitpunkt $MC[i][i]=k$ von Prozess $i$ verschickt, dann muss
+\begin{equation*}
+\forall j \colon MC[j][i] \geq k
+\end{equation*}
+erfüllt sein, damit $i$ die Nachricht löschen kann.
+Die obige Bedingung impliziert, dass die $i$-te Komponente der Vektoruhren aller Prozesse $j$ größer oder gleich $k$ sind.
+Somit hat sich die Information von Prozess $i$ durch das komplette System verteilt und kann somit gelöscht werden \cite{garg2005concurrent}.
+
 
