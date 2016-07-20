@@ -16,8 +16,6 @@ Die Uhr eines Prozesses wird wie folgt verwaltet und aktualisiert:
 
 Die Werte innerhalb einer Vektoruhr $VC_i$ haben eine besondere Bedeutung für den Prozess $P_i$. $VC_i[i]$ gibt die Anzahl an Events an, welche $P_i$ zu dem Zeitpunkt des Betrachtens verarbeitet hat. Die anderen Werte der Uhr ($VC_i[j]$ mit $j \neq i$) zeigen an, dass sich alle Events welche durch den Prozess $P_j$ verarbeitet wurden kausal betrachtet in der Vergangenheit von $P_i$ befinden. Sie geben sozusagen an, was der Prozess $P_i$ über die Zeiten der anderen Prozesse weiß, diese Information kann sich zu dem Zeitpunkt jedoch bereits von den tatsächlichen Zeiten in den anderen Prozessen unterscheiden. Da jeder Prozess lediglich seinen Zähler in der Vektoruhr erhöhen darf, hat dieser zu jedem Zeitpunkt den aktuellsten Stand seiner lokalen Zeit. \cite{singhal1992efficient}[S. 48]
 
-\subsubsection{Vergleich von Vektoruhren untereinander}
-\label{vergleich}
 Eine Besonderheit der Vektoruhren besteht im Vergleich von Uhren untereinander. Dies wird notwendig, sobald ein Prozess eine Nachricht erhält und diese verarbeiten muss. Verarbeiten bedeutet im Kontext von Vektoruhren, dass die empfangene Nachricht an eine Anwendungsschicht weitergegeben wird. Warum dies notwendig ist, wird in Kapitel \ref{RolleDerAnwendung} genauer erläutert.
 
 Wie in Bedingung R3 unter \textit{\ref{R3} - \nameref{R3}} zu sehen, muss der Prozess seine Uhr entsprechen der mitgeschickten Vektoruhr der Nachricht aktualisieren. Der Vergleich zwischen der eigenen und der empfangenen Uhr muss dann bei Bedarf auf Anwendungsebene geschehen, denn dort wird entschieden, was mit der angekommenen Nachricht geschieht.
@@ -71,9 +69,9 @@ Wird eine Aktion beziehungsweise ein Event ausgeführt, zum Beispiel eine Ein- o
 
 Zu Beginn werden die Vektoruhren der Prozesse wie im vorherigen Beispiel beschrieben initialisiert. Das erste Event passiert an Prozess 2. Hier passiert beispielhaft eine Ein- oder Auszahlung, die tatsächliche Aktion spielt für das Beispiel weniger eine Rolle als die Tatsache, dass sich der Kontostand geändert hat. Durch die Änderung des Kontostandes wird also im System ein Event ausgelöst. Der Prozess $P_2$ schickt nun einen Broadcast mit dem aktualisierten Kontostand und seiner lokalen, ebenfalls aktualisierten Uhr an die übrigen Bankautomaten. Diese empfangen die Nachricht und behandeln sie entsprechend.
 
-Der Konflikt passiert in diesem Beispiel bei den nächsten beiden Events. Zunächst wird an Prozess $P_3$ ein Event ausgelöst. Dieser versucht nun, einen Broadcast an die anderen Automaten zu senden, was jedoch aus technischen Gründen fehlschlägt, so dass die Aktualisierungsnachricht nicht bei den übrigen Prozessen ankommt. Zeitgleich zu diesem Event wird auf Automat $P_1$ der Kontostand aktualisiert. Der Zeitpunkt \qq{Zeitgleich} bedeutet hier jedoch nicht zwangsweise, dass die Events tatsächlich zu der gleichen, physikalischen Zeit passiert sind, sondern lediglich im Sinne der Reihenfolge von auftretenden Events. Der Prozess sendet nach der Aktualisierung des Kontos sowie seiner lokalen Uhr den Broadcast. Der eigentliche Konflikt entsteht nun an Prozess $P_3$, denn dessen Änderung am Konto ist nicht in das Event von $P_1$ mit eingeflossen, die beiden Aktionen wurden also parallel ausgeführt und es kann durch einen Vergleich der Vektoruhren nicht entschieden werden, welches Event vor dem anderen stattgefunden hat. Nach den Regeln für den Vergleich von Vektoruhren in Kapitel \ref{vergleich} entspricht dies dem dritten Fall.
+Der Konflikt passiert in diesem Beispiel bei den nächsten beiden Events. Zunächst wird an Prozess $P_3$ ein Event ausgelöst. Dieser versucht nun, einen Broadcast an die anderen Automaten zu senden, was jedoch aus technischen Gründen fehlschlägt, so dass die Aktualisierungsnachricht nicht bei den übrigen Prozessen ankommt. Zeitgleich zu diesem Event wird auf Automat $P_1$ der Kontostand aktualisiert. Der Zeitpunkt \qq{Zeitgleich} bedeutet hier jedoch nicht zwangsweise, dass die Events tatsächlich zu der gleichen, physikalischen Zeit passiert sind, sondern lediglich im Sinne der Reihenfolge von auftretenden Events. Der Prozess sendet nach der Aktualisierung des Kontos sowie seiner lokalen Uhr den Broadcast. Der eigentliche Konflikt entsteht nun an Prozess $P_3$, denn dessen Änderung am Konto ist nicht in das Event von $P_1$ mit eingeflossen, die beiden Aktionen wurden also parallel ausgeführt und es kann durch einen Vergleich der Vektoruhren nicht entschieden werden, welches Event vor dem anderen stattgefunden hat. Nach den Regeln für den Vergleich von Vektoruhren in \textit{Kapitel \ref{prinzipFunktion}} entspricht dies dem dritten Fall.
 
-Eine Praktische Bedeutung hätte dies, wenn in $P_3$ bei einem Kontostand von 100 \euro{} der Betrag 60 \euro{} abgehoben würde. Werden nun zeitgleich an Automat $P_1$ 80 \euro{} abghoben, so hat der Automat $P_3$ nun seinen lokalen Kontostand über 20 \euro{} sowie den empfangenen von 40 \euro{}. Ein solcher Konflikt kann und darf nicht auf der Ebenen der Vektoruhren gelöst werden. Er muss an eine Anwendungs-API weitergereicht werden, was in Kapitel \ref{RolleDerAnwendung} genauer erläutert wird.  
+Eine Praktische Bedeutung hätte dies, wenn in $P_3$ bei einem Kontostand von 100 \euro{} der Betrag 60 \euro{} abgehoben würde. Werden nun zeitgleich an Automat $P_1$ 80 \euro{} abghoben, so hat der Automat $P_3$ nun seinen lokalen Kontostand über 20 \euro{} sowie den empfangenen von 40 \euro{}. Ein solcher Konflikt kann und darf nicht auf der Ebenen der Vektoruhren gelöst werden. Er muss an eine Anwendungs-API weitergereicht werden, was in \textit{Kapitel \ref{RolleDerAnwendung}} genauer erläutert wird.  
 
 \subsection{Umsetzung in C\#}
 \label{vectorClockImpl}
@@ -111,9 +109,7 @@ Ein Node stellt einen Prozess in dem simulierten System dar. In diesem werden Ev
 
 Die Kommunikation zwischen dem Commander und den Nodes wurde mittels UDP realisiert. Die Entscheidung viel auf UDP, da sich dadurch unnötiger Overhead und Programmieraufwand vermeiden lässt, welcher beispielsweise bei TCP angefallen wäre. Der Unterschied liegt hierbei in Art der Verbindung. UPD ist ein Verbindungsloses Protokoll, bei dem Nachrichten nur an einen Empfänger verschickt werden und dieser nicht darauf antwortet. Bei TCP hingegen muss vor der eigentlichen Kommunikation ein Verbindungsaufbau stattfinden, was zwangsweise in erhöhtem Overhead resultiert \cite*{Markert2013}.
 
-\FloatBarrier
-\subsubsection{Nachrichtenaufbau}
-Der Aufbau einer Nachricht ist in Abbildung \ref{figure:aufbauNachricht} dargestellt. Generell lässt sich ein Nachrichtenobjekt in drei Bestandteile aufteilen. Diese sind ein Header, ein Control- sowie Communicationblock. 
+Wichtig für die Beschreibung der Architektur ist auch der Aufbau der ausgetauschten Nachrichten. Dieser ist in Abbildung \ref{figure:aufbauNachricht} dargestellt. Generell lässt sich ein Nachrichtenobjekt in drei Bestandteile aufteilen. Diese sind ein Header, ein Control- sowie Communicationblock. 
 
 \begin{figure}[ht]
 	\centering
@@ -131,7 +127,7 @@ Im Falle einer Kommunikationsnachricht kommt der Communicationblock zum tragen. 
 Beim Absenden der Nachricht, egal ob im Commander oder in den Nodes, wird diese serialisiert und per UDP versendet. Im Empfangsfall muss der empfangene Datenstrom wieder deserialisiert und in eine Nachricht umgewandelt werden. Sowohl Serialisierung als auch Deserialisierung wir durch die Klasse textit{MessageSerializer} gehandhabt, welche intern auf die Funktionen der Klasse \textit{BinaryFormatter} zugreift.
 
 \FloatBarrier
-\subsubsection{Empfang von Nachrichten}
+\subsubsection{Austausch von Nachrichten}
 \label{empfangVonNachrichten}
 Sowohl der Commander als auch alle Nodes warten ständig während der Ausführung auf ankommende Nachrichten. Dies wurde im Code durch eine While-Schleife implementiert.
 
@@ -176,8 +172,6 @@ listenToNodeTask.Start();
 \end{lstlisting}
 
 Wie in Listing \ref{lst:commanderWhile} zu sehen ist, wird am Ende des MainViewModel-Konstruktors nach dem Abfragen des Status für alle Nodes ein neuer Task \code{listenToNodeTask} erzeugt. Dieser bekommt die Methode \code{ListenToNode()} übergeben, in welcher eine ähnliche While-Schleife ausgeführt wird wie in Listing \ref{lst:nodeWhile}. Am Ende des Konstruktors wird der Task gestartet und das asynchrone Warten auf Nachrichten beginnt.
-
-\subsubsection{Absenden von Nachrichten}
 
 Das Absenden von Nachrichten funktioniert ähnlich wie das Versenden. Dabei sind die Methoden sowohl im Commander als auch den Nodes die selben, erneut jedoch mit der Einschränkung, dass bei dem Commander wieder die asynchrone Variante der Send-Methode auf dem UdpClient aufgerufen werden muss. 
 
