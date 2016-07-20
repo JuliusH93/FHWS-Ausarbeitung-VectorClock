@@ -184,13 +184,13 @@ Sendet nun ein Prozess eine Nachricht, hängt er seinen aktuellen Zählerstand a
 Empfängt nun ein anderer Prozess eine Nachricht kann er anhand des Zeitstempels der Nachricht und seiner lokalen Uhr den kausalen Zusammenhang erschließen.
 
 Formal ist eine Lamportuhr $C$, wie alle logische Uhren, als eine Funktion definiert, welche einem Ereignis $e$ eine Nummer $C(e)$ zuweist.
-Lamportuhren erfüllen die Uhrbedinung aus Abschnitt~\ref{cap:ordnung} indem jeder Prozess $i$ seine eigene Uhr $C_i$ hält und nach folgenden Regel aktualisiert:
+Lamport Uhren erfüllen die Uhrbedinung aus Abschnitt~\ref{cap:ordnung}, indem jeder Prozess $i$ seine eigene Uhr $C_i$ hält und nach folgenden Regel aktualisiert:
 \begin{itemize}
     \item Wenn $e_i^x$ kein Empfang-Ereignis ist, dann ist $C_i(e_i^x):=C_i(e_i^{x-1})+1$
     \item Ist $e_i^x$ ein Empfang-Ereignis der Nachricht $m$, dann ist $C_i(e_i^x):=\max\{C_i(e_i^{x-1}), C_j(e_j^y)  \} + 1$, wobei Prozess $j$ die Nachricht $m$ an $i$ geschickt hat und $C_j(e_j^y)$ der Uhrwert des Sende-Ereignis ist.
 \end{itemize}
 
-Abbildung~\ref{fig:lamportBsp} zeigt eine exemplarische Kommunikation zwischen drei Prozessen, dabei wird die Lamportuhr zum Zeitpunkt eines Ereignisses als Zahl in der Grafik dargestellt.
+\fig{fig:lamportBsp} zeigt eine exemplarische Kommunikation zwischen drei Prozessen, dabei wird die Lamportuhr zum Zeitpunkt eines Ereignisses als Zahl in der Grafik dargestellt.
 Es ist einfach zu zeigen, dass Lamportuhren die Uhrbedingung erfüllen.
 Hierbei muss gezeigt werden, dass die aus der Uhrbedingung abgeleiteten Bedingungen erfüllt sind.
 Wird eine Nachricht versendet, muss die lokale Lamportuhr inkrementiert werden. 
