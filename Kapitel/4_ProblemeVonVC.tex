@@ -135,16 +135,15 @@ In \fig{fig:vecConcurrent} ist eine solche aufgeschobene Aktualisierung dargeste
 \begin{figure}[ht]
     \centering
     \includegraphics[width=1\textwidth]{VektorConcurr.pdf}
-    \caption[Aufheben von Nachrichten]{Grafische Darstellung des Fork-Join-Event Modells bei Verwendung von Interval Tree Clocks in einem dynamischen System.}
+    \caption[Aufheben von Nachrichten]{Grafische Darstellung zweier Konflikte. Zum einen muss eine Nachricht richtig eingeordnet werden, da sie überholt wurde und zum anderem wurden die Nachrichten zu $e_1$ und $e_2$ gleichzeitig verschickt.}
     \label{fig:vecConcurrent}
 \end{figure} 
-
 
 Es kann jedoch passieren, dass durch die Vektoruhr keine Reihenfolge zwischen zwei Aktualisierungen festgestellt werden konnte, nämlich genau dann wenn $e_1 \parallel e_2$ gilt.
 Diese nebenläufige Schreiboperationen, also Operationen die noch nicht abgeschlossen sind bevor Neue ausgeführt werden, stellen ein Problem für die eventual consistency dar.
 Um einen Datenverlust zu vermeiden muss entschieden werden, in welcher Reihenfolge die Schreiboperationen ausgeführt werden sollen.
 Die Schwierigkeit besteht jedoch darin, dass die Vektoruhr keine Aussage hierzu treffen kann.
-\fig{TODO} zeigt zwei gleichzeitig aufgetretene Schreiboperationen $e_1$ und $e_3$.
+\fig{fig:vecConcurrent} zeigt zwei gleichzeitig aufgetretene Schreiboperationen $e_1$ und $e_3$.
 Durch die Vektoruhren kann auf die Nebenläufigkeit $e_1 \parallel e_3$ getestet werden:
 \begin{align*}
       C_3(e_3)[1] & \leq C_1(e_1)[1] & \wedge & & C_1(e_1)[3] & \leq C_3(e_3)[3] \\
@@ -195,15 +194,20 @@ Schickt nun der Empfänger seinerseits eine Nachricht an den ursprünglichen Sen
 Anhand dieser kann der Prozess $i$ bestimmen, welche Nachrichten bereits von $j$ verarbeitet wurden, nämlich alle die kleiner oder gleich der Vektoruhr von $j$ für die $i$-te Komponente sind.
 
 Dieses Vorgehen funktioniert auch indirekt zwischen mehr als zwei Prozessen.
-\fig{TODO} zeigt eine solche Situation.
-Prozess $p_0$ sendet zwei Nachricht $m_1$ und $m_2$ an $p_1$.
-Anschließend schickt $p_1$ eine Nachricht $m_2$ an $p_3$.
+\fig{fig:vectorPiggyback} zeigt eine solche Situation.
+Prozess $p_1$ sendet zwei Nachricht $m_1$ und $m_2$ an $p_2$.
+Anschließend schickt $p_2$ eine Nachricht $m_3$ an $p_3$.
 Zu diesem Zeitpunkt kennt $p_3$ den aktuellsten Stand von $p_2$ und auch $p_1$, da diese zum Zeitpunkt des Verschickens von $m_2$ von $p_2$ bekannt war.
 Schickt nun $p_3$ eine Nachricht an Prozess $p_1$, kann dieser aus der Vektoruhr erschließen, dass $p_3$ die Information von Nachricht $m_1$ erhalten hat.
 Sendet nun $p_2$ noch eine Nachricht an $p_1$, kann $p_1$ erkennen, dass alle im Prozess den aktuellen Zustand kennt.
 Somit kann $p_1$ die gespeicherten Nachrichten $m_1$ und $m_2$ verwerfen, da das gesamte System sie bereits erhalten hat.
 
-% TODO figure
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=1\textwidth]{VektorPiggypack.pdf}
+    \caption[Löschen alter Nachrichten]{Am Ende der dargestellten Kommunikation kann  $p_1$ sowohl $m_1$ als auch $m_2$ verwerfen, da dem kompletten System die Information bekannt ist.}
+    \label{fig:vectorPiggyback}
+\end{figure} 
 
 Eine zweite Situation in der alte Nachrichten, diesmal auf der Empfängerseite, gespeichert werden, ergibt sich wenn die Auslieferung der Nachrichten kausal geordnet erfolgen soll.
 Dies ist zum Beispiel der Fall bei eventual consistency, da Aktualisierungen in der selben Reihenfolge angewendet werden muss in der sie aufgetreten sind.
