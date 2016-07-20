@@ -234,7 +234,7 @@ Ferner ist es nicht möglich ob das Versenden von $m_3$ vom Empfangen von $m_1$ 
     \centering
     \includegraphics[width=0.40\textwidth]{LamportConcurrent.png}
     \caption[Lamportuhren und Kausalität]{Nebenläufige Nachrichtenübertragung unter Verwendung von Lamportuhren.}
-    Quelle: \cite{tanenbaum2007distributed}
+    Quelle: \cite{Tanenbaum2007}
     \label{fig:LamportConcurrent}
 \end{figure}
 
@@ -248,7 +248,7 @@ Hierzu müssen zusätzliche Informationen über die restlichen Prozesse gespeich
 Vektoruhren stellen eine Erweiterung der von Lamport vorgestellten Uhr dar und werden häufig eingesetzt um die Defizite der Lamportuhr zu beheben.
 Statt einem einzelnen skalaren Zeitstempel, verwenden Vektoruhren viele Zähler um die kausale Abhängigkeit zwischen Ereignisse umfänglicher zu erfassen, als dies mit Lamportuhren möglich wäre.
 Ihr Name wurde ihnen gegeben, da die Zeitstempel in einem Vektor zusammengefasst werden.
-Sie wurden zeitgleich von Mattern \cite{bibid} und Fidge \cite{bibid} vorgeschlagen und analysiert.
+Sie wurden zeitgleich von Mattern \cite{mattern1989virtual} und Fidge \cite{fidge1991logical, fidge1988timestamps} vorgeschlagen und analysiert.
 
 Wie bei Lamportuhren verwaltet jeder Prozess seine eigne lokale Uhr.
 Die Uhr ist jedoch nun ein Vektor aus $n$ skalaren Werten, bei einem System bestehend aus $n$ Prozesse.
