@@ -3,18 +3,19 @@
 \subsection{Systemmodell}
 % Events: senden, empfangen, internal
 Dieser Abschnitt beschreibt ein vereinfachtes Modell eines verteilten Systems, welches als Grundlage für alle weiteren Ausführungen heran gezogen wird.
-Der Einfachheit halber wird ein sehr grundlegendes Modell verwendet, welches jedoch ausreichend ist um die in dieser Arbeit geschilderten Zusammenhänge darzustellen, ohne Beschränkung der Allgemeinheit.
+Zur Vereinfachung wird ein sehr grundlegendes Modell verwendet, welches jedoch ausreichend ist um die in dieser Arbeit geschilderten Zusammenhänge korrekt und ohne Beschränkung der Allgemeinheit darzustellen.
 
 In unserem Modell besteht ein verteiltes System aus $n$ Prozesse die durch die Menge $P=\{p_1, p_2,\ldots, p_n\}$ beschrieben sind.
 Die Prozesse können lediglich durch das Senden und Empfangen von Nachrichten kommunizieren.
-Dabei wird angenommen, dass Nachrichten zuverlässig verschickt werden und somit in jedem Fall, nach einer gewissen Verzögerung, beim Empfänger ankommen.
+Dabei wird angenommen, dass Nachrichten zuverlässig verschickt werden und somit in jedem Fall, nach einer gewissen endlichen Verzögerung, beim Empfänger ankommen.
 Nachrichten müssen nicht zwangsläufig in der selben Reihenfolge ankommen in der sie gesendet wurden.
 Dies ist dem Übertragungsweg geschuldet.
 
-Ein Prozess $p_i$ besteht aus einer Sequenz von Ereignissen $E_i=\{e_i^1, e_i^2, \ldots\}$, welche eine totale Ordnung aufweisen.
-Die Menge $E$ enthält alle Ereignisse die im kompletten System auftreten.
+Ein Prozess $p_i$ besteht aus einer Sequenz von Ereignissen $E_i=\{e_i^1, e_i^2, \ldots\}$, welche eine totale Ordnung aufweist.
 Diese Ordnung ergibt sich durch den Programmablauf des Prozesses und wird durch die Relation $\rightarrow$ beschrieben.
-Löst ein Prozess $p_i$ zum Beispiel zuerst ein Ereignis $e_i^x$ aus und anschließend ein Zweites $e_i^y$, gilt $e_i^x \rightarrow e_i^y$. \fig{fig:genericEvents} zeigt eine exemplarische Kommunikation zwischen drei Prozessen und deren Ereignisse.
+Löst ein Prozess $p_i$ zum Beispiel zuerst ein Ereignis $e_i^x$ aus und anschließend ein Zweites $e_i^y$, gilt $e_i^x \rightarrow e_i^y$. 
+Die Menge $E$ enthält alle Ereignisse die im gesamten System auftreten.
+\fig{fig:genericEvents} zeigt eine exemplarische Kommunikation zwischen drei Prozessen und deren Ereignisse.
 
 Jedes Ereignis ist atomar und stellt eine Zustandsänderung des dazugehörigen Prozesses dar.
 Für die in dieser Arbeit beschriebenen Verfahren sind von besonderer Interesse die \qq{gesendet}- und \qq{empfangen}-Ereignisse.
@@ -24,7 +25,7 @@ Beiden Ereignisse können daher als Erweiterung der lokalen Programmordnung eine
 \begin{figure}[ht]
     \centering
     \includegraphics[width=12cm]{2_generic_events.pdf}
-    \caption[Beispiel einer beliebigen Kommunikation]{TODO}
+    \caption[Beispiel einer beliebigen Kommunikation]{Darstellung einer auf Nachrichten basierten Kommunikation dreier Prozesse. Ereignisse sind als schwarze Punkte auf den Zeitstrahlen und Nachrichten als Pfeile dargestellt.}
     \label{fig:genericEvents}
 \end{figure}
 
@@ -40,10 +41,16 @@ Die unterste Schicht stellt die Netzwerkschicht dar, die Aufgabe dieser Schicht 
 % kausale Ordnung
 % partielle kausale Ordnung
 % totale Ordnung
-Der Zusammenhang zwischen Ursache und Wirkung wird als Kausalität bezeichnet.
+Die meisten Menschen würden wahrscheinlich sagen, dass ein Ereigniss $a$ vor einem Ereigniss $b$ passierte, wenn $a$ zu einem früheren Zeitpunkt als $b$ auftrat.
+Das Konzept \qq{Zeit} ist fundamental in unserer Art zu denken verankert.
+Es ist von dem grundlegenderen Konzept der Ordnung in der Ereignisse eintreten abgeleitet.
+Die zeitliche Ordnung von Ereignissen bestimmt die Art wie wir über die Funktionsweise Systeme denken \cite{Lamport1978}.
+
+Dies führt zu Überlegungen über den Zusammenhang von Ursache und Wirkung.
+Die Verbindung zwischen dem auslösenden Ereignis und dem ausgelösten Ereignis wird als Kausalität bezeichnet.
 Es wird also die Abfolge von aufeinander bezogenen Ereignisse oder Zustände betrachtet.
 Meist ist es nicht direkt ersichtlich ob Ereignisse kausal zusammenhängen, hierzu müssen die Gegebenheiten und Zusammenhänge der Ereignisse genau bekannt sein.
-Dies ist nicht immer gegeben und auch nicht einfach entscheidbar. % TODO Beispiel wo es nicht einfach ist?
+Dies ist nicht immer gegeben und auch nicht einfach entscheidbar, da hierzu Zusammenhänge betrachtet werden müssen, die meist in einer höhreren Schicht gegeben sind oder schlichtweg für einen Computer.
 Daher wird im folgenden immer von potentieller Kausalität gesprochen.
 Das bedeutet, dass nur Aussagen darüber gemacht werden ob ein Ereignis die Ursache für ein Anderes sein kann.
 
@@ -56,8 +63,6 @@ Durch die Verteilung und Parallelität des Programmcodes ist die \qq{natürliche
 Innerhalb eines Prozesses ist die Ordnung weiterhin gegeben, da sich ein lokaler Prozess wie oben geschildert verhält.
 Wird nun aber das Gesamtbild, also das ganze System betrachtet, sind die Eigenschaften von oben nicht mehr gegeben.
 Das Wissen um die Kausalität der Ereignisse ist jedoch häufig notwendig um die Konsistenz des Systems zu wahren.
-
-% TODO Konsitenz erklären vlt hier?
 
 Der potentielle kausale Zusammenhang zwischen Ereignisse kann durch die Zeit festgestellt werden.
 Ein Ereignis, welches zu einem späteren Zeitpunkt eingetreten ist, kann unmöglich die Ursache für ein vorhergehendes Ereignis sein.
@@ -92,11 +97,13 @@ Dann können diese beiden Ereignisse parallel ausgeführt werden, da keines das 
 Diese Nebenläufigkeit wird in Symbolen als $e_i^x \parallel e_j^y$ geschrieben.
 
 Es ist offensichtlich, dass jede korrekte logische Uhr die \qq{happend before}-Relation einhalten muss.
-Lamport folgert daraus die Uhrbedingung (engl. \qq{clock condition}) die von jeder korrekten logischen Uhr erfüllen muss:
+Lamport folgert daraus die Uhrbedingung (engl. \qq{clock condition}) die von jeder korrekten logischen Uhr erfüllen muss \cite{Lamport1978}:
 \begin{equation*}
 \forall e_i^x, e_j^y \in E \colon \text{wenn } e_i^x \Rightarrow e_j^y \text{ dann } C(e_i^x) < C(e_j^y)
 \end{equation*}
-%TODO In Worte fassen, was diese Bedinung aussagt
+
+In Worte gefasst bedeutet diese Bedingung, dass die Uhren zweier Ereignisse durch die kleiner-als-Relation die kausale happend-before-Relation bestimmen.
+Der Größenvergleich der Uhren gibt also Aufschluss über die kausale Abhängigkeit der Ereignisse.
 Aus dieser Uhrbedingung lassen sich zwei konkrete Bedingungen an den Uhren ableiten, welche sich direkt aus der Definition der $\Rightarrow$-Relation ergeben:
 \begin{itemize}
     \item Wenn $e_i^x \rightarrow e_i^y$, dann $C(e_i^x) < C(e_i^y)$.
@@ -151,7 +158,7 @@ So kann mit einer Rechenoperation die Zeitdauer zwischen zwei Timestampes berech
 Wird nun jedem Ereignis in einem verteilten System ein Unix-Timestamp zugewiesen, kann theoretisch eine zeitliche Ordnung der Ereignisse über Prozessgrenze hinaus erreicht werden. Dies wird durch eine einfache Sortierung nach dem Zeitstempel erzielt.
 Ein Problem dieser Herangehensweise ist die Auflösung des Zeitstempels. Treten mehrere Ereignisse innerhalb einer Sekunde auf, kann ihre Reihenfolge nicht am Timestamp festgestellt werden, da sich dieser logischerweise nur jede Sekunde ändert.
 
-Hier ist die Unixzeit nicht mehr ausreichend und eine andere, genauere Darstellung muss gewählt werden.
+Hier ist die Unixzeit nicht mehr ausreichend und eine genauere Darstellung muss gewählt werden.
 Dabei steigt jedoch die Komplexität bei der Verarbeitung der Zeitstempel.
 Zusätzlich ist nicht sofort klar, welche Darstellung als genau genug gilt.
 Je kleiner der zeitliche Unterschied zwischen zwei Zeitstempeln desto genauer das System.
@@ -159,22 +166,26 @@ Hierbei muss ein Kompromiss zwischen Genauigkeit, Speicherbedarf und Verarbeitun
 
 Ein weiteres Problem von physikalischen Uhren ist ihre Abweichung von der tatsächlichen Zeit.
 So besitzt jeder Quartzkristall eine gewisse Schwankung in seiner Frequenz.
-Dadurch driftet die Computeruhr immer weiter von der tatsächlichen Zeit ab.
+Dadurch driftet die Computeruhr immer weiter von der tatsächlichen Zeit ab \cite{Coulouris2011}[S. 598].
 Umgangssprachlich würde man sagen, die Uhr geht vor bzw. nach.
 Dieses Abdriften lässt sich nur durch Verwendung von genaueren Uhren wie z.B. Atomuhren vermeiden.
 Es ist jedoch unpraktikabel in jeden Computer eine Atomuhr zu installieren, daher muss die Uhr eines Computers mit einer anderen exakten Uhr regelmäßig synchronisiert werden.
-In Netzwerken wird hierzu in der Regel das in der Einleitung erwähnte NTP Protokoll verwendet.
-
-Für ein verteiltes System kann der absolute Fehler einer Uhr vernachlässigt werden, solang alle beteiligten Prozesse den selben Fehler haben und somit relativ innerhalb des Systems richtig sind.
-Liegen zum Beispiel die Uhren aller Prozesse exakt 10 Sekunden in der Vergangenheit, kann die Reihenfolge der Ereignisse immer noch festgestellt werden. Weisen jedoch nur manche Prozesse einen Fehler auf, kann die Reihenfolge nicht mehr korrekt aus den Zeitstempel erschlossen werden.
+In Netzwerken wird hierzu in der Regel das in der Einleitung erwähnte Network Time Protocol verwendet \cite{Coulouris2011}[S. 603].
 
 Dieser Abweichung einzelner Uhren kann durch geeigneter Algorithmen entgegnet werden.
-Ein solcher Algorithmus ist der Berkeley-Algorithmus. Dieser erfordert jedoch einen globalen Zeitgeber.
-Es ist allgemein akzeptiert, dass eine globale physikalische Uhr für verteile System nicht tauglich ist. % TODO voll die Behauptung
+Ein solcher Algorithmus ist der Berkeley-Algorithmus \cite{gusella1989accuracy}. 
+Dieser erfordert jedoch einen globalen Zeitgeber, der im Gegensatz zu NTP, aktiv die Zeit im Netzwerk verteilt.
+Im Allgemeinen wird in verteilten Systemen davon ausgegangen, dass keine globale Uhr existiert und somit physikalische Uhren nicht zur Anwendung kommen \cite{Tanenbaum2007}[S. 11].
+
+Für ein verteiltes System kann der absolute Fehler einer Uhr vernachlässigt werden, solang alle beteiligten Prozesse den selben Fehler haben und somit relativ innerhalb des Systems richtig sind.
+Liegen zum Beispiel die Uhren aller Prozesse exakt 10 Sekunden in der Vergangenheit, kann die Reihenfolge der Ereignisse immer noch festgestellt werden. 
+Weisen jedoch nur manche Prozesse einen Fehler auf, kann die Reihenfolge nicht mehr korrekt aus den Zeitstempel erschlossen werden.
+Ist die Zeit aller Prozesse System intern konsistent, kann auf eine Synchronisation einer externen realen Zeit verzichtet werden \cite{bengel2015masterkurs}[S. 359].
+Diese Überlegung führt zu der Definition von logischen Uhren.
 
 \subsubsection{Lamport-Uhren}
 \label{cap:vectorclock}
-Leslie Lamport beschreibt in seinem Paper \cite{Lamport1978} von 1978, indem er gleichzeitig kausale Ordnung definiert, ein Verfahren um Prozesse durch logische Uhren zu synchronisieren.
+Leslie Lamport beschreibt in seinem Paper \cite{Lamport1978}, indem er gleichzeitig kausale Ordnung definiert, ein Verfahren um Prozesse durch logische Uhren zu synchronisieren.
 Sein vorgeschlagener Algorithmus ist heute als Lamport Uhr bekannt und stellt eine simple Möglichkeit dar, partielle kausale Ordnung in einem verteilen System herzustellen.
 Lamport führt den Begriff der logischen Zeit ein.
 Hierbei verläuft die logische Zeit diskret und schreitet nur voran, wenn ein Ereignis eintritt \cite{leon2013ereignisdiskrete}.
@@ -252,16 +263,16 @@ Sie wurden zeitgleich von Mattern \cite{mattern1989virtual} und Fidge \cite{fidg
 
 Wie bei Lamportuhren verwaltet jeder Prozess seine eigne lokale Uhr.
 Die Uhr ist jedoch nun ein Vektor aus $n$ skalaren Werten, bei einem System bestehend aus $n$ Prozesse.
-Jede Komponente $C_i(e_i^x)[j]$ entspricht dem letzten Uhrenwert den Prozess $i$ zu Prozess $j$ zum Zeitpunkt $e_i^x$ kennt.
+Jede Komponente $VC_i(e_i^x)[j]$ entspricht dem letzten Uhrenwert den Prozess $i$ zu Prozess $j$ zum Zeitpunkt $e_i^x$ kennt.
 Folgende Regeln müssen bei der Aktualisierung der Uhr eingehalten werden:
 \begin{itemize}
-    \item Wenn $e_i^x$ das Empfang-Ereignis der Nachricht $m$ ist, dann $C_i(e_i^x):=\max\{ C_i(e_i^{x-1}), C_j(e_j^y) \}$, wobei $C_j(e_j^y)$ der Uhrenvektor des Sende-Ereignisses von Prozess $j$ ist, welcher die Nachricht $m$ an Prozess $i$ gesendet hat. Das Maximum wird komponentenweise bestimmt.
-    \item Wenn $e_i^x$ ein beliebiges Ereignis ist, dann muss der Prozess seine Vektorkomponente inkrementiert: $C_i(e_i^x)[i]:=C_i(e_i^{x-1})[i] + 1$. Dies beinhaltet auch Empfang-Ereignisse.
+    \item Wenn $e_i^x$ das Empfang-Ereignis der Nachricht $m$ ist, dann $VC_i(e_i^x):=\max\{ VC_i(e_i^{x-1}), VC_j(e_j^y) \}$, wobei $VC_j(e_j^y)$ der Uhrenvektor des Sende-Ereignisses von Prozess $j$ ist, welcher die Nachricht $m$ an Prozess $i$ gesendet hat. Das Maximum wird komponentenweise bestimmt.
+    \item Wenn $e_i^x$ ein beliebiges Ereignis ist, dann muss der Prozess seine Vektorkomponente inkrementiert: $VC_i(e_i^x)[i]:=VC_i(e_i^{x-1})[i] + 1$. Dies beinhaltet auch Empfang-Ereignisse.
 \end{itemize}
 
 \fig{fig:VektorBsp} zeigt den selben Kommunikationsverlauf wie \fig{fig:lamportBsp} jedoch mit der Verwendung von Vektoruhren statt Lamportuhren.
-Anschaulich betrachtet ist $\Cieix[i]$ gleich der Anzahl der von Prozess $i$ ausgeführten Ereignisse (inklusive $\eix$) zum Zeitpunkt von $\eix$ bereits ausgeführt hat.
-Nach der selben Logik gibt $\Cieix[j]$ die Anzahl der Ereignisse von Prozess $i$ an, die vor $\eix$ eingetreten sind.
+Anschaulich betrachtet ist $\VCieix[i]$ gleich der Anzahl der von Prozess $i$ ausgeführten Ereignisse (inklusive $\eix$) zum Zeitpunkt von $\eix$ bereits ausgeführt hat.
+Nach der selben Logik gibt $\VCieix[j]$ die Anzahl der Ereignisse von Prozess $i$ an, die vor $\eix$ eingetreten sind.
 
 \begin{figure}[ht]
     \centering
@@ -271,9 +282,9 @@ Nach der selben Logik gibt $\Cieix[j]$ die Anzahl der Ereignisse von Prozess $i$
     \label{fig:VektorBsp}
 \end{figure}
 
-Der große Vorteil von Vektoruhren ist, dass sie nicht nur die Uhrenbedingung erfüllen sondern auch eine strengere Variation, nämlich die starke Uhrenbedingung:
+Der große Vorteil von Vektoruhren ist, dass sie nicht nur die schwache Uhrenbedingung erfüllen sondern auch eine strengere Variation, nämlich die starke Uhrenbedingung \cite{Lamport1978}:
 \begin{equation*}
-\forall e_i^x, e_j^y \in E \colon C(e_i^x) < C(e_j^y) \text{ genau dann, wenn } e_i^x \Rightarrow e_j^y
+\forall e_i^x, e_j^y \in E \colon VC(e_i^x) < VC(e_j^y) \text{ genau dann, wenn } e_i^x \Rightarrow e_j^y
 \end{equation*}
 
 Bei Lamportuhren, welche nur die schwache Uhrenbedingung erfüllen, ist die Aussage $C_i(e_i^x)<C_j(e_j^y)$ doppeldeutig. 
@@ -283,14 +294,14 @@ Somit wurde die Schwäche von Lamportuhren eliminiert.
 
 Damit die starke Uhrenbedingung von Vektoruhren erfüllt werden kann, muss zuerst die $<$-Relation von Vektoruhren definiert werden:
 \begin{align*}
-\Cieix &< \Cjejy \text{ genau dann, wenn} \\
-       & \Cieix \ne \Cjejy \text{ und } \\
-       & \forall k | 1 \leq k \leq n \colon \Cieix[k] \leq \Cjejy[k].
+\VCieix &< \VCjejy \text{ genau dann, wenn} \\
+       & \VCieix \ne \VCjejy \text{ und } \\
+       & \forall k | 1 \leq k \leq n \colon \VCieix[k] \leq \VCjejy[k].
 \end{align*}
 
 Nun kann anhand einer Vektoruhr entscheiden werden ob ein Ereignis kausal abhängig von einem Anderen ist:
 \begin{equation*}
-    \eix \Rightarrow \ejy \text{ genau dann, wenn } \Cieix[i] \leq \Cjejy[i].
+    \eix \Rightarrow \ejy \text{ genau dann, wenn } \VCieix[i] \leq \VCjejy[i].
 \end{equation*}
 
 Hervorzuheben ist, dass nur eine einzige skalare Operation notwendig ist, um diesen Zusammenhang zu erschließen.
@@ -299,8 +310,8 @@ Wird sie angewendet und ergibt $\eix \centernot\Rightarrow \ejy$, muss sie ein z
 Dies führt zu dem Nebenläufigkeitstest:
 \begin{align*}
     \eix \parallel & \ejy \text{ genau dann, wenn } \\
-                   & \Cjejy[i] \le \Cieix[i] \text{ und } \\
-                   & \Cieix[j] \le \Cjejy[j].
+                   & \VCjejy[i] \le \VCieix[i] \text{ und } \\
+                   & \VCieix[j] \le \VCjejy[j].
 \end{align*}
 
 Ergibt der Test $\eix \centernot\parallel \ejy$ kann direkt anhand des nicht erfüllten Terms der beiden Bedingungen entschieden werden ob $\eix \Rightarrow \ejy$ oder $\ejy \Rightarrow \eix$ gilt.

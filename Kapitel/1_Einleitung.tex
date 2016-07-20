@@ -6,38 +6,47 @@ Durch die zentrale Konfiguration und Verteilung der Zeit im Netzwerk wird der Ad
 Der Hauptverwendungszweck für NTP ist jedoch ein Anderer: Nämlich das ständige synchronisieren der aktuellen Zeit auf den Systemen.
 Dies ist notwendig, da jede Uhr einen Fehler aufweist, der dazu führt, dass ihre Zeit abdriftet.
 Daher wird ein Zeitserver im Netzwerk eingesetzt der seine lokale Zeit auf die Clients verteilt.
-Dieser synchronisiert sich wiederum mit einer Zeitquelle höherer Qualität wie z.B. einer Atomuhr.
+Dieser synchronisiert sich wiederum mit einer Zeitquelle höherer Qualität wie zum Beispiel einer Atomuhr.
 
 Seit der Veröffentlichung von NTP vor knapp 30 Jahren hat sich die Computerlandschaft deutlich verändert.
 Die breite Adaptierung des Internets als weltweite Kommunikationsbasis und die Fragmentierung der Anwenderhardware fordern dezentral arbeitende Systeme.
-So besitzt ein typischer Anwender heute neben einen klassischen Computer, ein Smartphone und eventuell ein Tablet.
+So besitzt ein typischer Anwender heute neben einem klassischen Computer, ein Smartphone und eventuell ein Tablet.
 Trotzdem sollen seine Daten auf allen Geräten gleichermaßen zugreifbar sein.
-Um diese Anwenderflexibilität zu ermöglichen, werden heute viele Anwendungen als verteilte Systeme entworfen.
+Um diese Anwenderflexibilität zu ermöglichen und bei steigender Datenmenge die von den Anwendern erwartete hohe Geschwindigkeit zu bieten, werden heute viele Anwendungen als verteilte Systeme entworfen.
 
-Ein solches verteiltes System setzt sich aus mehreren Einzelkomponenten auf unterschiedlichen Rechnern zusammen, die in der Regel nicht über gemeinsamen Speicher verfügen \cite{schill12}.
-Solche verteilte Anwendungen bringen viele neue Herausforderungen mit sich.
+Ein solches verteiltes System setzt sich aus mehreren Einzelkomponenten auf unterschiedlichen Rechnern zusammen, die in der Regel nicht über gemeinsamen Speicher verfügen \cite{schill12}[S. 21].
+Diese Art von Anwendungen bringen viele neue Herausforderungen mit sich.
 Der nicht vorhandene gemeinsame Speicher führt dazu, dass die Kommunikation zwischen den Prozessen nur über Nachrichten erfolgen kann und in der Regel über das Netzwerk erfolgt. So kann unter Umständen eine vermeintlich einfache Leseoperation zu einer langwierigen Netzwerkanfrage führen.
 
-Zusätzlich ist es nicht mehr ohne weiteres möglich einen globalen Zustand innerhalb eines verteilen Systems zu halten.
-Durch die Verteilung der Prozesse auf unterschiedlichen Computern, sind die Prozesse von einander isoliert. Daraus folgt, dass es nicht einen globalen Zustand geben kann, sondern einen lokalen Zustand pro Prozess. Wird nun so ein lokaler Zustand geändert, muss er auf die restlichen Prozesse repliziert werden. Solang alle Prozesse den selben lokalen Zustand haben, kann von einem globalen Zustand gesprochen werden. Da bei der Kommunikationen Verzögerungen auftreten können, kann jedoch eine Situation entstehen, in der ein Prozess seinen lokalen Zustand mitteilt, bevor ihn die letzte Replikation erreicht, in diesem Fall ist der globale Zustand inkonsistent.
+Zusätzlich ist es nicht mehr ohne Weiteres möglich einen globalen Zustand innerhalb eines verteilen Systems zu halten.
+Die Verteilung der Prozesse auf unterschiedlichen Computern führt dazu, dass Prozesse von einander isoliert ausgeführt werden.
+Daraus folgt, dass es nicht einen globalen Zustand geben kann, sondern einen lokalen Zustand pro Prozess. Wird nun so ein lokaler Zustand geändert, muss er auf die restlichen Prozesse repliziert werden. Solang alle Prozesse den selben lokalen Zustand haben, kann von einem globalen Zustand gesprochen werden.
+Da auf dem Kommunikationsweg Verzögerungen auftreten können, kann jedoch eine Situation entstehen, in der ein Prozess seinen lokalen Zustand mitteilt, bevor ihn die letzte Replikation erreicht, in diesem Fall ist der globale Zustand inkonsistent.
 
-Um dennoch einen globalen Zustand speichern zu können, wie zum Beispiel in einer verteilten Datenbank, müssen die Operationen innerhalb des Systems synchronisiert werden. So kann zum Beispiel gefordert werden, dass alle Operationen in der selben Reihenfolge auf den Replikas ausgeführt wird. Eine Operation kann als Ereignis betrachtet werden, welches zu einem bestimmten Zeitpunkt auftritt. Anhand diesem Zeitpunktes kann darauf geschlossen werden, welche Ereignisse wann eintraten und somit eine definierte Reihenfolge aufweisen.
+Um dennoch einen globalen Zustand speichern zu können, wie zum Beispiel in einer verteilten Datenbank, müssen die Operationen innerhalb des Systems synchronisiert werden. So kann zum Beispiel gefordert werden, dass alle Operationen in der selben Reihenfolge auf den Replikationen ausgeführt werden.
+Das Ausführen einer Operation kann als Ereignis betrachtet werden, welches zu einem bestimmten Zeitpunkt auftritt.
+Anhand diesem Zeitpunktes kann darauf geschlossen werden, welche Ereignisse wann eintraten und somit eine definierte Reihenfolge aufweisen.
 
 In verteilten System spielt die absolute Zeit selten eine Rolle, sondern vielmehr die relative Zeit zwischen Ereignissen.
 So ist es für das System unerheblich zu wissen wann genau ein Ereignis eintrat, solange die Reihenfolge der Ereignisse festgestellt werden kann. Unter dieser Voraussetzung können Zähler verwendet werden. Diese Zähler stellen keinen Bezug zu der physikalischen Zeit her, ermöglichen es aber anhand des Zählerstandes zu entscheiden, welche Ereignisse vorausgingen.
-Diese abstrakte Sichtweise von Uhren führt zu dem Begriff logischer Uhren. In dieser Arbeit wird ein Vertreter der logischen Uhren genauer behandelt, nämlich Vektor Uhren.
+
+Diese abstrakte Sichtweise von Uhren und Zeit wurde 1978 von Leslie Lamport in seinem Artikel \qq{Time, Clocks, and the Ordering of Events in a Distributed System} vorgeschlagen und wird seitdem als Grundlage für den Großteil aller verteilten Systeme verwendet.
+Lamports Arbeit lieferte die Grundlage für viele neue Entwicklungen und stellte Ausgangspunkt für viele Weiterentwicklungen seiner Idee dar.
+Im Jahr 2013 erhielte er den Turing-Award für seine grundlegende Beiträge zur Theorie und Praxis verteilter und nebenläufiger Systeme und im Besonderen für seine Erfindung des Konzepts Kausalität und logischen Uhren \cite{acm2013turing}.
+Einer auf seiner vorgeschlagenen Uhr basierte Weiterentwicklung stellen Vektoruhren dar.
+Diese finden noch heute in modernen Systemen Anwendung und werden in dieser Ausarbeitung behandelt.
 
 \subsection{Zielsetzung}
 Diese Arbeit ist im Rahmen des Faches \qq{Ausgewählte Probleme der verteilten Systeme} entstanden und gibt einen Überblick rund um den Themenbereich von Vektoruhren.
-Hierzu behandelt die vorliegende Arbeit das Thema Vektoruhren mit dem Ziel ein Verständnis für die Funktionsweise zu entwickeln und Besonderheiten, solcher Uhren zu ermitteln.
-Die theoretischen Grundlagen werden beschrieben und der historische und technische Zusammenhang zu ähnlichen Konzepten erarbeitet.
-Ferner werden weiterführende Uhrenarten vorgestellt.
+Hierzu behandelt die vorliegende Arbeit das Thema Vektoruhren mit dem Ziel ein Verständnis für die Funktionsweise zu entwickeln und Besonderheiten solcher Algorithmen zu ermitteln.
+Die theoretischen Grundlagen werden beschrieben, der historische und technische Zusammenhang zu ähnlichen Konzepten erarbeitet.
+Ferner werden weiterführende Uhrenarten kurz vorgestellt.
 
 Außerdem gibt diese Arbeit eine Einordnung der Vektoruhren im Themenkomplex verteilter Systeme und grenzt sie gegenüber anderen Bereiche ab.
 Notwendigerweise werden auch Schwächen und Probleme von Vektoruhren im klassischen Sinne behandelt und Lösungen erörtert.
 
-Ein tiefes Verständnis von Algorithmen wird häufig bei der Implementierung eines solchen geschaffen.
-Daher wurde im Rahmen dieser Arbeit eine Implementierung von Vektoruhren geschaffen und ein vereinfachtes Anwendungssystem auf Basis dieser entwickelt.
+Ein tiefes Verständnis von Algorithmen wird häufig bei der Implementierung dieser entwickelt.
+Daher wurde im Rahmen dieser Arbeit eine Implementierung von Vektoruhren geschaffen und ein vereinfachtes Anwendungssystem auf Basis dieser umgesetzt.
 Hierbei stand weniger die Praxistauglichkeit, sondern viel mehr die prinzipielle Funktionsweise von Vektoruhren im Vordergrund.
 
 \subsection{Aufbau}
