@@ -9,7 +9,7 @@ Jeder Prozess im System besitzt seine eigene Vektoruhr in der Form eines Vektors
 Die Uhr eines Prozesses wird wie folgt verwaltet und aktualisiert:
 
 \begin{itemize}
-	\item[R1]Jedes mal, wenn ein Prozess $P_i$ ein Event auslöst, muss dieser seine Vektoruhr für den Eintrag $VC_i$ um Eins hochzählen, es gilt  $VC_i[i] := VC_i[i] + 1$. Dadurch verdeutlicht der Prozess, dass er ein Event verarbeitet hat und signalisiert dies den anderen Prozessen durch aktualisieren seiner Vektoruhr 
+	\item[R1]Jedes mal, wenn ein Prozess $P_i$ ein Event auslöst, muss dieser seine Vektoruhr für den Eintrag $VC_i$ um Eins inkrementieren, es gilt  $VC_i[i] := VC_i[i] + 1$. Dadurch verdeutlicht der Prozess, dass er ein Event verarbeitet hat und signalisiert dies den anderen Prozessen durch aktualisieren seiner Vektoruhr 
 	\item[R2]Sendet ein Prozess $P_i$ eine Nachricht $m$, so hängt er seine aktuelle Vektoruhr $VC_i$ an die zu sendende Nachricht an. Auf diese Weise gelangt die Uhr zu dem Empfänger der Nachricht.
 	\item[R3]Empfängt ein Prozess $P_i$ eine Nachricht, so muss er seine Vektoruhr aktualisieren. Dabei geht er wie folgt vor: $VC_i = \max(VC_i, m.VC)$. Dies bedeutet, dass der Prozess für jedes Element seiner Vektoruhr überprüft, ob der Wert in der Uhr der Nachricht größer als der eigene ist. Sollte dies der Fall sein, wird der eigene Wert an dieser Stelle mit dem Wert aus der anderen Uhr überschrieben.\label{R3}
 \end{itemize} \cite{Baldoni:2002:FDC:1435723.1437765}[S. 4]
@@ -25,9 +25,9 @@ Wie in Bedingung R3 unter \textit{\ref{R3} - \nameref{R3}} zu sehen, muss der Pr
 Für zwei zu vergleichende Uhren $VC_1$ und $VC_2$ gibt es folgenden Beziehungen:
 
 \begin{eqnarray}
-&VC_1 \leq VC_2& \text{ wenn } \forall i : VC_1[i] \leq VC_2[i] \\
-	&VC_1 < VC_2& \text{ wenn } VC_1 \leq VC_2 \text{ \& } VC_1 \neq VC_2 \\
-	&VC_1 \mid \mid VC_2& \text{ wenn } !(VC_1 < VC_2) \text{ \& } !(VC_2 < VC_1)
+&VC_1 \leq VC_2& \text{ genau dann, wenn } \forall i : VC_1[i] \leq VC_2[i] \\
+	&VC_1 < VC_2& \text{ genau dann, wenn } VC_1 \leq VC_2 \wedge VC_1 \neq VC_2 \\
+	&VC_1 \mid \mid VC_2& \text{ genau dann, wenn } \neg(VC_1 < VC_2) \wedge \neg(VC_2 < VC_1)
 \end{eqnarray}
 \cite{Mattern88virtualtime}[S. 127, Definition 4]
 
