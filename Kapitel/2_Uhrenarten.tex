@@ -262,6 +262,14 @@ Folgende Regeln müssen bei der Aktualisierung der Uhr eingehalten werden:
 Anschaulich betrachtet ist $\Cieix[i]$ gleich der Anzahl der von Prozess $i$ ausgeführten Ereignisse (inklusive $\eix$) zum Zeitpunkt von $\eix$ bereits ausgeführt hat.
 Nach der selben Logik gibt $\Cieix[j]$ die Anzahl der Ereignisse von Prozess $i$ an, die vor $\eix$ eingetreten sind.
 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.80\textwidth]{VektorBeispiel.pdf}
+    \caption[Exemplarische Kommunikation mit Vektoruhren]{Kommunikation zwischen drei Prozessen unter Verwendung von Vektoruhren.}
+    Nachgezeichnet aus  \cite{landes2006dynamic}
+    \label{fig:VektorBsp}
+\end{figure}
+
 Der große Vorteil von Vektoruhren ist, dass sie nicht nur die Uhrenbedingung erfüllen sondern auch eine strengere Variation, nämlich die starke Uhrenbedingung:
 \begin{equation*}
 \forall e_i^x, e_j^y \in E \colon C(e_i^x) < C(e_j^y) \text{ genau dann, wenn } e_i^x \Rightarrow e_j^y
@@ -300,15 +308,6 @@ Der große Nachteil von Vektoruhren besteht darin, dass ein fixer Index verwende
 Dies führt zu zwei sehr einschränkenden Voraussetzungen.
 Zum einen muss die Anzahl der Prozesse konstant und zum anderen auch im Voraus bekannt sein.
 In dynamischen System stellen diese beiden Einschränkungen ein ernstes Problem dar, da die Anzahl in solchen System nicht einfach zu bestimmen ist, was in der Natur der Sache liegt \cite{landes2006dynamic}.
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.80\textwidth]{VektorBeispiel.pdf}
-    \caption[Exemplarische Kommunikation mit Vektoruhren]{Kommunikation zwischen drei Prozessen unter Verwendung von Vektoruhren.}
-    Nachgezeichnet aus  \cite{landes2006dynamic}
-    \label{fig:VektorBsp}
-\end{figure}
-
 
 \subsubsection{Interval Tree Clocks}
 Vektoruhren haben den großen Nachteil für dynamischen Systeme eher ungeeignet zu sein.
