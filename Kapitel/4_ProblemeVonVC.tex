@@ -228,11 +228,16 @@ Es gibt jedoch Anwendungsfälle, wie zum Beispiel verteilte Datenbanken, bei den
 In diesem Fall können alle gespeicherten Nachrichten verworfen werden, wenn eine aktuellere Nachricht empfangen wurde.
 Dies stellt eine mögliche Optimierung dar, da nicht alle Nachrichten sondern nur eine, die Aktuellste, der Anwendung gemeldet werden muss.
 
-\fig{TODO} zeigt eine Situation in der die zu erst verschickte Nachricht $m_1$ von $p_1$ von den beiden Nachrichten $m_2$ und $m_3$ überholt wurde und somit als letztes bei $p_2$ angekommen ist.
+\fig{fig:vecaufheben} zeigt eine Situation in der die zu erst verschickte Nachricht $m_1$ von $p_1$ von den beiden Nachrichten $m_2$ und $m_3$ überholt wurde und somit als letztes bei $p_2$ angekommen ist.
 Eine Möglichkeit ist es nun, dass $p_2$ die Nachrichten $m_2$ und $m_3$ bis zum Empfangen von $m_1$ aufhebt und die Nachrichten in der korrekten Reihenfolge der Anwendung zustellt.
 Alternativ könnte $p_2$ aber auch beim Empfangen von $m_2$ und $m_3$ diese direkt Zustellen und $m_1$ verwerfen, da bereits aktuellere Nachrichten empfangen wurden und der Inhalt von $m_1$ bereits bekannt oder obsolete ist.
 
-% TODO figure
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=1\textwidth]{VektorAufheben.pdf}
+    \caption[Aufheben alter Nachrichten]{Vektoruhren erlauben es beim Empfang die Ereignisse nach ihrem Auftreten zu ordnen.}
+    \label{fig:vecaufheben}
+\end{figure}
 
 Der letzte Anwendungsfall ist Garbage Collection innerhalb des verteilten Systems.
 Angenommen ein Prozess möchte eine Nachricht verschicken und deren Information sofort wieder verwerfen.
