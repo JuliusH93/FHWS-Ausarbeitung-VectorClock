@@ -6,13 +6,13 @@ In diesem Kapitel wird die allgemeine Funktionsweise von Vektoruhren behandelt. 
 Wie bereits beschrieben wurde, bilden Vektoruhren eine Erweiterung der Lamportuhr. Dabei wird in jedem Prozess im System ein Integer als Zähler in der Vektoruhr gespeichert. Im Allgemeinen werden durch eine Vektoruhr Zeitstempel mit Events im System assoziiert \cite{Baldoni:2002:FDC:1435723.1437765}[S. 3].
 
 Jeder Prozess im System besitzt seine eigene Vektoruhr in der Form eines Vektors $VC_i[1...n]$, wobei alle Elemente der Uhr mit $0$ initialisiert werden. Im Laufe der Kommunikation werden durch die verschiedenen, verteilten Prozesse Nachrichten untereinander verschickt. Damit durch den Einsatz von Vektoruhren nachvollzogen werden kann, wie die Zeitlichen Reihenfolge solcher Events aussieht, müssen die entsprechenden Uhren jeweils bei auftreten eines Events angepasst werden.
-Die Uhr eines Prozesses wird wie folgt verwaltet und aktualisiert:
+Die Uhr eines Prozesses wird wie folgt verwaltet und aktualisiert \cite{Baldoni:2002:FDC:1435723.1437765}[S. 4]:
 
 \begin{itemize}
 	\item[R1]Jedes mal, wenn ein Prozess $P_i$ ein Event auslöst, muss dieser seine Vektoruhr für den Eintrag $VC_i$ um Eins inkrementieren, es gilt  $VC_i[i] := VC_i[i] + 1$. Dadurch verdeutlicht der Prozess, dass er ein Event verarbeitet hat und signalisiert dies den anderen Prozessen durch aktualisieren seiner Vektoruhr 
 	\item[R2]Sendet ein Prozess $P_i$ eine Nachricht $m$, so hängt er seine aktuelle Vektoruhr $VC_i$ an die zu sendende Nachricht an. Auf diese Weise gelangt die Uhr zu dem Empfänger der Nachricht.
 	\item[R3]Empfängt ein Prozess $P_i$ eine Nachricht, so muss er seine Vektoruhr aktualisieren. Dabei geht er wie folgt vor: $VC_i = \max(VC_i, m.VC)$. Dies bedeutet, dass der Prozess für jedes Element seiner Vektoruhr überprüft, ob der Wert in der Uhr der Nachricht größer als der eigene ist. Sollte dies der Fall sein, wird der eigene Wert an dieser Stelle mit dem Wert aus der anderen Uhr überschrieben.\label{R3}
-\end{itemize} \cite{Baldoni:2002:FDC:1435723.1437765}[S. 4]
+\end{itemize}
 
 Die Werte innerhalb einer Vektoruhr $VC_i$ haben eine besondere Bedeutung für den Prozess $P_i$. $VC_i[i]$ gibt die Anzahl an Events an, welche $P_i$ zu dem Zeitpunkt des Betrachtens verarbeitet hat. Die anderen Werte der Uhr ($VC_i[j]$ mit $j \neq i$) zeigen an, dass sich alle Events welche durch den Prozess $P_j$ verarbeitet wurden kausal betrachtet in der Vergangenheit von $P_i$ befinden. Sie geben sozusagen an, was der Prozess $P_i$ über die Zeiten der anderen Prozesse weiß, diese Information kann sich zu dem Zeitpunkt jedoch bereits von den tatsächlichen Zeiten in den anderen Prozessen unterscheiden. Da jeder Prozess lediglich seinen Zähler in der Vektoruhr erhöhen darf, hat dieser zu jedem Zeitpunkt den aktuellsten Stand seiner lokalen Zeit. \cite{singhal1992efficient}[S. 48]
 
@@ -44,7 +44,7 @@ Nun empfängt Prozess $P_1$ diese Nachricht. Gemäß Regel R1 muss zunächst die
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=12cm]{KommBeispiel1.pdf}
+	\includegraphics[width=10cm]{KommBeispiel1.pdf}
 	\caption[Beispiel einer konfliktfreien Kommunikation]{Ablauf der Kommunikation dreier Prozesse mit Veranschaulichung der dabei auftretenden Vektoruhren.}
 	Quelle: Nachgezeichnet aus \cite{Baldoni:2002:FDC:1435723.1437765}[S. 5]
 	\label{figure:kommBeispiel1}
@@ -61,7 +61,7 @@ Wird eine Aktion beziehungsweise ein Event ausgeführt, zum Beispiel eine Ein- o
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=12cm]{KommBeispiel2.pdf}
+	\includegraphics[width=10cm]{KommBeispiel2.pdf}
 	\caption[Beispiel einer konfliktbehafteten Kommunikation]{Ablauf der Kommunikation in einem Bankensystem, bei dem durch einen Broadcast ein Konflikt beim Vergleich von Vektoruhren auftritt.}
 	\label{figure:kommBeispiel2}
 \end{figure}
