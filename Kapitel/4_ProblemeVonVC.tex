@@ -135,7 +135,7 @@ In \fig{fig:vecConcurrent} ist eine solche aufgeschobene Aktualisierung dargeste
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=1\textwidth]{VektorConcurr.pdf}
+    \includegraphics[width=0.8\textwidth]{VektorConcurr.pdf}
     \caption[Aufheben von Nachrichten]{Grafische Darstellung zweier Konflikte. Zum einen muss eine Nachricht richtig eingeordnet werden, da sie überholt wurde und zum anderem wurden die Nachrichten zu $e_1$ und $e_2$ gleichzeitig verschickt.}
     \label{fig:vecConcurrent}
 \end{figure} 
@@ -157,7 +157,7 @@ Da die Middelware, die in der Regel die Handhabung der Vektoruhr übernimmt, kei
 Wie die Applikation endgültig den Konflikt löst ist stark anwendungsabhängig und unterscheidet sich von Fall zu Fall.
 Eine einfache, jedoch mit Datenverlust behaftete Lösung ist es die letzte Schreiboperation zu übernehmen und die ältere zu verwerfen.
 
-Die Amazon Datenbank unterscheidet zwischen syntaktische und schematische Konflikte.
+Die Amazon Datenbank unterscheidet generell zwischen syntaktische und schematische Konflikte.
 Können die Operationen durch die Vektoruhren kausal geordnet werden, gilt der Konflikt als syntaktisch gelöst.
 Ist dies nicht möglich muss er schematisch gelöst werden, also durch die Applikationsschicht.
 
@@ -205,7 +205,7 @@ Somit kann $p_1$ die gespeicherten Nachrichten $m_1$ und $m_2$ verwerfen, da das
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=1\textwidth]{VektorPiggypack.pdf}
+    \includegraphics[width=0.8\textwidth]{VektorPiggypack.pdf}
     \caption[Löschen alter Nachrichten]{Am Ende der dargestellten Kommunikation kann  $p_1$ sowohl $m_1$ als auch $m_2$ verwerfen, da dem kompletten System die Information bekannt ist.}
     \label{fig:vectorPiggyback}
 \end{figure} 
@@ -228,11 +228,16 @@ Es gibt jedoch Anwendungsfälle, wie zum Beispiel verteilte Datenbanken, bei den
 In diesem Fall können alle gespeicherten Nachrichten verworfen werden, wenn eine aktuellere Nachricht empfangen wurde.
 Dies stellt eine mögliche Optimierung dar, da nicht alle Nachrichten sondern nur eine, die Aktuellste, der Anwendung gemeldet werden muss.
 
-\fig{TODO} zeigt eine Situation in der die zu erst verschickte Nachricht $m_1$ von $p_1$ von den beiden Nachrichten $m_2$ und $m_3$ überholt wurde und somit als letztes bei $p_2$ angekommen ist.
+\fig{fig:vecaufheben} zeigt eine Situation in der die zu erst verschickte Nachricht $m_1$ von $p_1$ von den beiden Nachrichten $m_2$ und $m_3$ überholt wurde und somit als letztes bei $p_2$ angekommen ist.
 Eine Möglichkeit ist es nun, dass $p_2$ die Nachrichten $m_2$ und $m_3$ bis zum Empfangen von $m_1$ aufhebt und die Nachrichten in der korrekten Reihenfolge der Anwendung zustellt.
 Alternativ könnte $p_2$ aber auch beim Empfangen von $m_2$ und $m_3$ diese direkt Zustellen und $m_1$ verwerfen, da bereits aktuellere Nachrichten empfangen wurden und der Inhalt von $m_1$ bereits bekannt oder obsolete ist.
 
-% TODO figure
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{VektorAufheben.pdf}
+    \caption[Aufheben alter Nachrichten]{Vektoruhren erlauben es beim Empfang die Ereignisse nach ihrem Auftreten zu ordnen.}
+    \label{fig:vecaufheben}
+\end{figure}
 
 Der letzte Anwendungsfall ist Garbage Collection innerhalb des verteilten Systems.
 Angenommen ein Prozess möchte eine Nachricht verschicken und deren Information sofort wieder verwerfen.

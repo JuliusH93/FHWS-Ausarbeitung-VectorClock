@@ -222,7 +222,7 @@ caption=Auszug aus der \code{HandleControlMessage()}-Methode. Hier wird ein Upda
  }
 \end{lstlisting}
 
-Im Programmablauf findet eine Verarbeitung nach dem Empfang statt, welcher in Abschnitt~\ref{empfangVonNachrichten} bereits behandelt wurde. Wie beschrieben findet anhand des Befehls, welcher in dem Kontroll-Block der Nachricht enthalten ist, eine Verzweigung in Kontroll-Ebene und Kommunikations-Ebene statt. Nach dieser Verzweigung wird in der selben Methode immer eine Antwortnachricht an den Commander erstellt und abgeschickt, welche die aktuelle lokale Vektoruhr sowie den Payload der Applikationslogik enthält.
+In dem Programmablauf findet eine Verarbeitung nach dem Empfang statt, welcher in Abschnitt~\ref{empfangVonNachrichten} bereits behandelt wurde. Wie beschrieben findet anhand des Befehls, welcher in dem Kontroll-Block der Nachricht enthalten ist, eine Verzweigung in Kontroll-Ebene und Kommunikations-Ebene statt. Nach dieser Verzweigung wird in der selben Methode immer eine Antwortnachricht an den Commander erstellt und abgeschickt, welche die aktuelle lokale Vektoruhr sowie den Payload der Applikationslogik enthält.
 
 Liegt eine Nachricht auf Kontrollebene vor, welche demnach von dem Commander stammt, wird die darin enthaltenen Aktion ausgeführt. Dies kann entweder eine Kontostandaktualisierung mit anschließendem Broadcast, die Aufforderung zum Senden einer Nachricht an einen anderen einzelnen Node oder ein allgemeiner Befehl wie beispielsweise \code{Shutdown} sein. Ein Auszug aus der Implementierung ist in Listing~\ref{lst:handleMessageIncrease} abgebildet.
 
