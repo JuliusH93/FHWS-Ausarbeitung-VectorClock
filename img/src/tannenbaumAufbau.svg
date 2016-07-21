@@ -173,9 +173,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8"
-     inkscape:cx="394.26665"
-     inkscape:cy="944.33574"
+     inkscape:zoom="5.6"
+     inkscape:cx="428.76581"
+     inkscape:cy="916.13007"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -200,7 +200,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -209,12 +209,12 @@
      inkscape:groupmode="layer"
      id="layer1">
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:2,2;stroke-dashoffset:0"
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.8;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:1.6,1.6;stroke-dashoffset:0"
        d="m 358,147.3622 160,0"
        id="path4251-9"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:2,2;stroke-dashoffset:0"
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.8;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:1.6,1.6;stroke-dashoffset:0"
        d="m 358,102.3622 160,0"
        id="path4251"
        inkscape:connector-curvature="0" />
@@ -252,9 +252,11 @@
        inkscape:connector-curvature="0" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 455,143.3622 0,-10"
+       d="m 455,143.3622 0,-10.31567"
        id="path5658"
-       inkscape:connector-curvature="0" />
+       inkscape:connector-curvature="0"
+       transform="translate(0,4.7244096e-6)"
+       sodipodi:nodetypes="cc" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow2Mstart-0)"
        d="m 455.00961,83.362205 0,15"
