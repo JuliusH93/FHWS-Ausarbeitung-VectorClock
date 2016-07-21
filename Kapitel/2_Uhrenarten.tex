@@ -269,7 +269,7 @@ Die Uhr ist jedoch nun ein Vektor aus $n$ skalaren Werten, bei einem System best
 Jede Komponente $VC_i(e_i^x)[j]$ entspricht dem letzten Uhrenwert den Prozess $i$ zu Prozess $j$ zum Zeitpunkt $e_i^x$ kennt.
 Folgende Regeln müssen bei der Aktualisierung der Uhr eingehalten werden:
 \begin{itemize}
-    \item Wenn $e_i^x$ das Empfangsereignis der Nachricht $m$ ist, dann $VC_i(e_i^x):=\max\{ VC_i(e_i^{x-1}), VC_j(e_j^y) \}$, wobei $VC_j(e_j^y)$ der Uhrenvektor des Sendeereignisses von Prozess $j$ ist, welcher die Nachricht $m$ an Prozess $i$ gesendet hat. Das Maximum wird komponentenweise bestimmt.
+    \item Wenn $e_i^x$ das Empfangsereignis der Nachricht $m$ ist, gilt $VC_i(e_i^x):=\max\{ VC_i(e_i^{x-1}), VC_j(e_j^y) \}$, wobei $VC_j(e_j^y)$ der Uhrenvektor des Sendeereignisses von Prozess $j$ ist, welcher die Nachricht $m$ an Prozess $i$ gesendet hat. Das Maximum wird komponentenweise bestimmt.
     \item Wenn $e_i^x$ ein beliebiges Ereignis ist, dann muss der Prozess seine Vektorkomponente inkrementiert: $VC_i(e_i^x)[i]:=VC_i(e_i^{x-1})[i] + 1$. Dies beinhaltet auch Empfangsereignisse.
 \end{itemize}
 
