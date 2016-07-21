@@ -383,7 +383,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4142136"
-     inkscape:cx="220.66094"
+     inkscape:cx="297.66145"
      inkscape:cy="875.67392"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -508,12 +508,6 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Latin Modern Math';-inkscape-font-specification:'Latin Modern Math'">p<tspan
    style="font-size:65%;baseline-shift:sub"
    id="tspan7052">3</tspan></tspan></text>
-    <circle
-       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       id="path7594"
-       cx="350"
-       cy="102.36221"
-       r="2.5" />
     <g
        id="g6843-1-4"
        transform="translate(-160,-7.7947129e-7)"
@@ -794,39 +788,6 @@
              x="302.32248"
              y="111.70522"
              id="tspan6831-0-3-2" /></text>
-      </g>
-    </g>
-    <g
-       id="g6843-1-4-2"
-       transform="translate(-10.000001,1.5387855e-7)"
-       style="stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none">
-      <g
-         transform="translate(59.999998,0)"
-         style="stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
-         id="g7455-4-7-4">
-        <rect
-           style="fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0"
-           id="rect6833-8-0-1"
-           width="50"
-           height="17.5"
-           x="300"
-           y="84.862206" />
-        <text
-           xml:space="preserve"
-           style="font-style:normal;font-weight:normal;font-size:12.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-           x="302.32248"
-           y="96.080223"
-           id="text6827-6-8-9"
-           sodipodi:linespacing="125%"><tspan
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Latin Modern Math';-inkscape-font-specification:'Latin Modern Math'"
-             sodipodi:role="line"
-             id="tspan6829-7-6-6"
-             x="302.32248"
-             y="96.080223">3</tspan><tspan
-             sodipodi:role="line"
-             x="302.32248"
-             y="111.70522"
-             id="tspan6831-0-3-6" /></text>
       </g>
     </g>
     <g

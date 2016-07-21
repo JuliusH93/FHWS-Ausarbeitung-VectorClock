@@ -16,6 +16,7 @@ Diese Ordnung ergibt sich durch den Programmablauf des Prozesses und wird durch 
 Löst ein Prozess $p_i$ zum Beispiel zuerst ein Ereignis $e_i^x$ aus und anschließend ein Zweites $e_i^y$, gilt $e_i^x \rightarrow e_i^y$. 
 Die Menge $E$ enthält alle Ereignisse die im gesamten System auftreten.
 \fig{fig:genericEvents} zeigt eine exemplarische Kommunikation zwischen drei Prozessen und deren Ereignisse.
+Dabei werden nur Sende- und Empfangsereignisse betrachtet.
 
 Jedes Ereignis ist atomar und stellt eine Zustandsänderung des dazugehörigen Prozesses dar.
 Für die in dieser Arbeit beschriebenen Verfahren sind von besonderer Interesse die \qq{gesendet}- und \qq{empfangen}-Ereignisse.
@@ -41,27 +42,27 @@ Die unterste Schicht stellt die Netzwerkschicht dar, die Aufgabe dieser Schicht 
 % kausale Ordnung
 % partielle kausale Ordnung
 % totale Ordnung
-Die meisten Menschen würden wahrscheinlich sagen, dass ein Ereigniss $a$ vor einem Ereigniss $b$ passierte, wenn $a$ zu einem früheren Zeitpunkt als $b$ auftrat.
+Die meisten Menschen würden sicherlich dem zustimmen, dass ein Ereignis $a$ vor einem Ereignis $b$ passierte, wenn $a$ zu einem früheren Zeitpunkt als $b$ auftrat.
 Das Konzept \qq{Zeit} ist fundamental in unserer Art zu denken verankert.
 Es ist von dem grundlegenderen Konzept der Ordnung in der Ereignisse eintreten abgeleitet.
-Die zeitliche Ordnung von Ereignissen bestimmt die Art wie wir über die Funktionsweise Systeme denken \cite{Lamport1978}.
+Die zeitliche Ordnung von Ereignissen bestimmt die Art wie wir über die Funktionsweise von Systeme denken \cite{Lamport1978}.
 
 Dies führt zu Überlegungen über den Zusammenhang von Ursache und Wirkung.
 Die Verbindung zwischen dem auslösenden Ereignis und dem ausgelösten Ereignis wird als Kausalität bezeichnet.
 Es wird also die Abfolge von aufeinander bezogenen Ereignisse oder Zustände betrachtet.
 Meist ist es nicht direkt ersichtlich ob Ereignisse kausal zusammenhängen, hierzu müssen die Gegebenheiten und Zusammenhänge der Ereignisse genau bekannt sein.
-Dies ist nicht immer gegeben und auch nicht einfach entscheidbar, da hierzu Zusammenhänge betrachtet werden müssen, die meist in einer höhreren Schicht gegeben sind oder schlichtweg für einen Computer.
+Dies ist nicht immer gegeben und auch nicht einfach entscheidbar, da hierzu Zusammenhänge betrachtet werden müssen, die meist in einer höhreren Schicht gegeben sind oder schlichtweg für einen Computer nicht erfassbar sind.
 Daher wird im folgenden immer von potentieller Kausalität gesprochen.
 Das bedeutet, dass nur Aussagen darüber gemacht werden ob ein Ereignis die Ursache für ein Anderes sein kann.
 
-In einem einzelnen nicht nebenläufigen Prozess ist die potentielle Kausalität gegeben durch den Programmablauf.
+In einem einzelnen nicht nebenläufigen Prozess ist die Kausalität durch den Programmablauf gegeben.
 Da die Instruktionen eines Programmes nacheinander ohne Vergabelungen ausgeführt werden und dabei jede Instruktion atomar ist, kann der aktuelle Zustand nur aus den davor ausgeführten Instruktionen bestimmt worden sein.
 Hierbei kann eine Instruktion analog zu einem Ereignis verstanden werden.
 
 Im Vergleich hierzu ist die Situation in einem verteilten System oder nebenläufigen Prozess deutlich komplexer.
 Durch die Verteilung und Parallelität des Programmcodes ist die \qq{natürliche} Ordnung nicht mehr gegeben.
 Innerhalb eines Prozesses ist die Ordnung weiterhin gegeben, da sich ein lokaler Prozess wie oben geschildert verhält.
-Wird nun aber das Gesamtbild, also das ganze System betrachtet, sind die Eigenschaften von oben nicht mehr gegeben.
+Wird nun aber das Gesamtbild, also das ganze System betrachtet, sind die obigen Eigenschaften nicht mehr gegeben.
 Das Wissen um die Kausalität der Ereignisse ist jedoch häufig notwendig um die Konsistenz des Systems zu wahren.
 
 Der potentielle kausale Zusammenhang zwischen Ereignisse kann durch die Zeit festgestellt werden.
@@ -74,16 +75,16 @@ Ein Computer hat natürlich kein intuitives Verständnis von Zeit.
 Daher müssen einige mathematische Definitionen festgelegt werden, welche die Grundlage für die Implementierung der zeitlichen Ordnungen dienen.
 
 Damit eine Ordnung hergestellt werden kann, müssen die Ereignisse in Relation gesetzt werden können.
-Eine Relation wurde bereits beschrieben, nämlich die \qq{Programmordnung} $\rightarrow$.
-Lamport \cite{Lamport1978} definiert in seiner Arbeit die \qq{happend before}-Relation $\Rightarrow$ und stellt die kleinste Relation dar, die folgende Bedingungen erfüllt:
+Eine Relation wurde bereits beschrieben, nämlich die \textit{Programmablaufrelation} $\rightarrow$.
+Lamport \cite{Lamport1978} definiert in seiner Arbeit die \textit{happend before} Relation $\Rightarrow$ und stellt die kleinste Relation dar, die folgende Bedingungen erfüllt:
 \begin{itemize}
     \item Wenn $e_i^x \rightarrow e_i^y$, dann $e_i^x \Rightarrow e_i^y$.
-    \item Wenn $e_i^x$ ein Senden Ereignis ist und $e_j^y$ das Empfangen Ereignis der selben Nachricht darstellt, dann folgt $e_i^x \Rightarrow e_j^y$.
+    \item Wenn $e_i^x$ ein Sendeereignis ist und $e_j^y$ das Empfangsereignis der selben Nachricht darstellt, dann folgt $e_i^x \Rightarrow e_j^y$.
     \item Wenn $e_i^x \Rightarrow e_j^y$ und $e_j^y \Rightarrow e_k^z$, dann $e_i^x \Rightarrow e_k^z$.
 \end{itemize}
 
-Aus der ersten Bedingung ist ersichtlich, dass aus der strengeren Programmordnung direkt die \qq{happend before}-Relation für zwei lokale Ereignisse abgeleitet werden kann.
-Die zweite Bedingung fordert, dass das Empfang Ereignis einer Nachricht nie vor dem Senden Ereignis eintreten kann.
+Aus der ersten Bedingung ist ersichtlich, dass aus der strengeren Programmordnung direkt die happend before Relation für zwei lokale Ereignisse abgeleitet werden kann.
+Die zweite Bedingung fordert, dass das Empfangsereignis einer Nachricht nie vor dem entsprechenden Sendeereignis eintreten kann.
 Offensichtlich kann also eine Nachricht nicht empfangen werden, wenn sie noch nicht verschickt wurde.
 Dieser Zusammenhang ist für Menschen zwar intuitiv ersichtlich kann nun aber auch für Computer korrekt formuliert werden.
 Durch die dritte Bedingung ist die Transitivität der Relation gegeben.
@@ -91,36 +92,37 @@ Wurde ein Ereignis $z$ nach $y$ ausgelöst und $x$ vor $y$ gilt logischerweise, 
 
 Ein Ereignis $e_j^y$ gilt als kausal abhängig von $e_i^x$ wenn $e_i^x \Rightarrow e_j^y$, da es nur ausgeführt werden kann wenn die Ausführung von $e_i^x$ bereits abgeschlossen ist.
 Alternativ kann $e_i^x$ als Vorbedingung von $e_j^y$ betrachtet werden.
+In dieser Notation gibt das Subskript den Index des Prozesses an und das Superskript die Postions des Ereignisses für den lokalen Prozess.
 
 Zwei Ereignisse gelten als gleichzeitig aufgetreten wenn $e_i^x \centernot\Rightarrow e_j^y$ und $e_j^y \centernot\Rightarrow e_i^x$ gilt.
-Dann können diese beiden Ereignisse parallel ausgeführt werden, da keines das jeweils Andere kausal beeinflussen kann.
+Dann können beide Ereignisse parallel ausgeführt werden, da sie sich nicht gegenseitig kausal beeinflussen können.
 Diese Nebenläufigkeit wird in Symbolen als $e_i^x \parallel e_j^y$ geschrieben.
 
-Es ist offensichtlich, dass jede korrekte logische Uhr die \qq{happend before}-Relation einhalten muss.
-Lamport folgert daraus die Uhrbedingung (engl. \qq{clock condition}) die von jeder korrekten logischen Uhr erfüllen muss \cite{Lamport1978}:
+Es ist offensichtlich, dass jede korrekte logische Uhr die happend before Relation einhalten muss.
+Lamport folgert daraus die Uhrenbedingung (engl. \qq{clock condition}), die von jeder korrekten logischen Uhr erfüllt werden muss \cite{Lamport1978}:
 \begin{equation*}
 \forall e_i^x, e_j^y \in E \colon \text{wenn } e_i^x \Rightarrow e_j^y \text{ dann } C(e_i^x) < C(e_j^y)
 \end{equation*}
 
-In Worte gefasst bedeutet diese Bedingung, dass die Uhren zweier Ereignisse durch die kleiner-als-Relation die kausale happend-before-Relation bestimmen.
+In Worte gefasst bedeutet diese Bedingung, dass die Uhren zweier Ereignisse durch die \textit{kleiner als} Relation die kausale happend before Relation bestimmen.
 Der Größenvergleich der Uhren gibt also Aufschluss über die kausale Abhängigkeit der Ereignisse.
-Aus dieser Uhrbedingung lassen sich zwei konkrete Bedingungen an den Uhren ableiten, welche sich direkt aus der Definition der $\Rightarrow$-Relation ergeben:
+Aus dieser Uhrenbedingung lassen sich zwei konkrete Bedingungen ableiten, welche sich direkt aus der Definition der $\Rightarrow$ Relation ergeben:
 \begin{itemize}
     \item Wenn $e_i^x \rightarrow e_i^y$, dann $C(e_i^x) < C(e_i^y)$.
-    \item Wenn $e_i^x$ ein Senden Ereignis ist und $e_j^y$ das Empfangen Ereignis der selben Nachricht darstellt, dann folgt $C(e_i^x) < C(e_i^y)$.
+    \item Wenn $e_i^x$ ein Sendeereignis ist und $e_j^y$ das Empfangsereignis der selben Nachricht darstellt, dann folgt $C(e_i^x) < C(e_i^y)$.
 \end{itemize}
 
-Die dritte Bedingung aus der Definition der \qq{happend before}-Relation muss hier nicht explizit wiederholt werden, da diese lediglich die Transitivität beschreibt und diese durch die $<$-Relation der Uhren gegeben ist.
+Die dritte Bedingung aus der Definition der happend before Relation muss hier nicht explizit wiederholt werden, da diese lediglich die Transitivität beschreibt und diese durch die $<$ Relation der Uhren gegeben ist.
 
 Die eingeführten Regeln erlauben es nun die Zusammenhänge zwischen Ereignisse genauer zu betrachten.
 Zustellungsregeln (engl. \qq{delivery rules}) definieren Einschränkungen an der Reihenfolge wie eingehende Nachrichten an den zu verarbeiteten Prozess verschickt werden dürfen.
-Eine wichtige Regel ist die FIFO-Zustellung (\qq{First In First Out}) die besagt, dass ein Prozess $j$ Nachrichten in der Reihenfolge empfangen muss wie sie von $i$ aus gesendet wurden.
+Eine wichtige Regel ist die FIFO-Zustellung (engl. \qq{first in first out delivery}) die besagt, dass ein Prozess $j$ Nachrichten in der selben Reihenfolge empfangen muss wie sie von $i$ versendet wurden.
 Dabei können Nachrichten von anderen Prozessen in beliebiger Reihenfolge versandt werden.
 Es gilt somit
 \begin{equation*}
     \text{wenn } e_i^s \rightarrow e_i^S \text{ dann } e_j^r \rightarrow e_j^R,
 \end{equation*}
-wobei $s$ und $S$ Sende-Ereignisse darstellen und $r/R$ die entsprechenden Empfang-Ereignisse sind.
+wobei $s$ und $S$ Sendeereignisse darstellen und $r/R$ die entsprechenden Empfangsereignisse sind.
 In dieser Definition ist keine bestimmte Reihenfolge an Ereignisse von anderen Prozessen gefordert.
 
 Eine weitere, im Vergleich zur FIFO-Zustellung strengere, Zustellungsregel ist die kausale Zustellung (engl. \qq{causal delivery}). Diese ist gegeben 
@@ -128,10 +130,10 @@ Eine weitere, im Vergleich zur FIFO-Zustellung strengere, Zustellungsregel ist d
     \text{wenn } e_i^s \Rightarrow e_k^S \text{ dann } e_j^r \rightarrow e_j^R.
 \end{equation*}
 
-Kausale Zustellung erweitert die FIFO-Zustellung um die Einschränkung, dass gesendete Nachrichten von verschiedenen Prozessen geordnet werden, sofern diese kausal nach der \qq{happend before}-Relation zusammenhängen.
+Kausale Zustellung erweitert die FIFO-Zustellung um die Einschränkung, dass gesendete Nachrichten von verschiedenen Prozessen geordnet werden, sofern diese kausal nach der happend before Relation zusammenhängen.
 
 Damit ein kausale Zustellung implementiert werden kann, muss die Uhr in der Lage sein Aussetzer in der Kommunikation zu erkennen.
-Diese Eigenschaft wird Unterbrechungserkennung (engl. \qq{gap detection}) genannt.
+Diese Eigenschaft wird \textit{gap detection} genannt.
 Sie beschreibt den Umstand, dass ein Prozess in der Lage sein muss anhand zweier eingehender Nachrichten und deren Zeitstempel erkennen können muss, dass eine Nachricht existiert die in der Reihenfolge zwischen den beiden vorhanden Nachrichten gehört und bisher nicht empfangen wurde.
 Formell gesprochen muss für zwei gegebenen Uhren $C_i(e_i^x) < C_j(e_j^y)$ entschieden werden, ob ein Ereignis $e_k^z$ mit $C_i(e_i^x)<C_k(e_k^z)<C_j(e_j^y)$ existiert \cite{babaoglu1993consistent}.
 
@@ -170,76 +172,77 @@ Dadurch driftet die Computeruhr immer weiter von der tatsächlichen Zeit ab \cit
 Umgangssprachlich würde man sagen, die Uhr geht vor bzw. nach.
 Dieses Abdriften lässt sich nur durch Verwendung von genaueren Uhren wie z.B. Atomuhren vermeiden.
 Es ist jedoch unpraktikabel in jeden Computer eine Atomuhr zu installieren, daher muss die Uhr eines Computers mit einer anderen exakten Uhr regelmäßig synchronisiert werden.
-In Netzwerken wird hierzu in der Regel das in der Einleitung erwähnte Network Time Protocol verwendet \cite{Coulouris2011}[S. 603].
+In Netzwerken wird hierzu in der Regel das, in der Einleitung erwähnte, Network Time Protocol verwendet \cite{Coulouris2011}[S. 603].
 
-Dieser Abweichung einzelner Uhren kann durch geeigneter Algorithmen entgegnet werden.
-Ein solcher Algorithmus ist der Berkeley-Algorithmus \cite{gusella1989accuracy}. 
-Dieser erfordert jedoch einen globalen Zeitgeber, der im Gegensatz zu NTP, aktiv die Zeit im Netzwerk verteilt.
+Eine für verteilte Systeme besser geeigneter Algorithmus zum korrigieren der Uhrabweichungen stellt der Berkeley-Algorithmus \cite{gusella1989accuracy} dar.
+Dieser erfordert jedoch einen globalen Zeitgeber, der im Gegensatz zu NTP, aktiv die Zeit im System verteilt.
+
 Im Allgemeinen wird in verteilten Systemen davon ausgegangen, dass keine globale Uhr existiert und somit physikalische Uhren nicht zur Anwendung kommen \cite{Tanenbaum2007}[S. 11].
-
 Für ein verteiltes System kann der absolute Fehler einer Uhr vernachlässigt werden, solang alle beteiligten Prozesse den selben Fehler haben und somit relativ innerhalb des Systems richtig sind.
 Liegen zum Beispiel die Uhren aller Prozesse exakt 10 Sekunden in der Vergangenheit, kann die Reihenfolge der Ereignisse immer noch festgestellt werden. 
 Weisen jedoch nur manche Prozesse einen Fehler auf, kann die Reihenfolge nicht mehr korrekt aus den Zeitstempel erschlossen werden.
-Ist die Zeit aller Prozesse System intern konsistent, kann auf eine Synchronisation einer externen realen Zeit verzichtet werden \cite{bengel2015masterkurs}[S. 359].
+Ist die Zeit aller Prozesse systemintern konsistent, kann auf eine Synchronisation einer externen realen Zeit verzichtet werden \cite{bengel2015masterkurs}[S. 359].
 Diese Überlegung führt zu der Definition von logischen Uhren.
 
 \subsubsection{Lamport-Uhren}
 \label{cap:vectorclock}
 Leslie Lamport beschreibt in seinem Paper \cite{Lamport1978}, indem er gleichzeitig kausale Ordnung definiert, ein Verfahren um Prozesse durch logische Uhren zu synchronisieren.
-Sein vorgeschlagener Algorithmus ist heute als Lamport Uhr bekannt und stellt eine simple Möglichkeit dar, partielle kausale Ordnung in einem verteilen System herzustellen.
+Sein vorgeschlagener Algorithmus ist heute als Lamport-Uhr bekannt und stellt eine simple Möglichkeit dar, partielle Ordnung in einem verteilen System herzustellen.
+
 Lamport führt den Begriff der logischen Zeit ein.
-Hierbei verläuft die logische Zeit diskret und schreitet nur voran, wenn ein Ereignis eintritt \cite{leon2013ereignisdiskrete}.
-Eine logische Uhr erfasst die logische Zeit indem bei eintritt eines Ereignisses ein Zähler inkrementiert wird.
+Hierbei verläuft die logische Zeit diskret und schreitet nur voran, wenn ein Ereignis eintritt \cite{leon2013ereignisdiskrete}[S. 462].
+Eine logische Uhr erfasst die logische Zeit indem bei Eintritt eines Ereignisses ein Zähler inkrementiert wird.
 Dabei hält jeder Prozess einen eigenen Zähler.
 Sendet nun ein Prozess eine Nachricht, hängt er seinen aktuellen Zählerstand als Zeitstempel an die Nachricht an.
 Empfängt nun ein anderer Prozess eine Nachricht kann er anhand des Zeitstempels der Nachricht und seiner lokalen Uhr den kausalen Zusammenhang erschließen.
 
-Formal ist eine Lamportuhr $C$, wie alle logische Uhren, als eine Funktion definiert, welche einem Ereignis $e$ eine Nummer $C(e)$ zuweist.
-Lamport Uhren erfüllen die Uhrbedinung aus Abschnitt~\ref{cap:ordnung}, indem jeder Prozess $i$ seine eigene Uhr $C_i$ hält und nach folgenden Regel aktualisiert:
+Formal ist eine Lamport-Uhr $C$, wie alle logische Uhren, als eine Funktion definiert, welche einem Ereignis $e$ eine Nummer $C(e)$ zuweist.
+Lamport-Uhren erfüllen die Uhrbedinung aus Abschnitt~\ref{cap:ordnung}, indem jeder Prozess $i$ seine eigene Uhr $C_i$ hält und nach folgenden Regel aktualisiert \cite{Lamport1978}:
 \begin{itemize}
-    \item Wenn $e_i^x$ kein Empfang-Ereignis ist, dann ist $C_i(e_i^x):=C_i(e_i^{x-1})+1$
-    \item Ist $e_i^x$ ein Empfang-Ereignis der Nachricht $m$, dann ist $C_i(e_i^x):=\max\{C_i(e_i^{x-1}), C_j(e_j^y)  \} + 1$, wobei Prozess $j$ die Nachricht $m$ an $i$ geschickt hat und $C_j(e_j^y)$ der Uhrwert des Sende-Ereignis ist.
+    \item Wenn $e_i^x$ kein Empfangsereignis ist, dann $C_i(e_i^x):=C_i(e_i^{x-1})+1$
+    \item Ist $e_i^x$ ein Empfang-Ereignis der Nachricht $m$, dann $C_i(e_i^x):=\max\{C_i(e_i^{x-1}), C_j(e_j^y)  \} + 1$, wobei Prozess $j$ die Nachricht $m$ an $i$ geschickt hat und $C_j(e_j^y)$ der Uhrwert des Sende-Ereignis ist.
 \end{itemize}
 
-\fig{fig:lamportBsp} zeigt eine exemplarische Kommunikation zwischen drei Prozessen, dabei wird die Lamportuhr zum Zeitpunkt eines Ereignisses als Zahl in der Grafik dargestellt.
-Es ist einfach zu zeigen, dass Lamportuhren die Uhrbedingung erfüllen.
+\fig{fig:lamportBsp} zeigt eine exemplarische Kommunikation zwischen drei Prozessen, dabei wird die Lamport-Uhr zum Zeitpunkt eines Ereignisses als Zahl in der Grafik dargestellt.
+Lamport bewies, dass seine Uhr die Uhrenbedingung erfüllt \cite{Lamport1978}.
 Hierbei muss gezeigt werden, dass die aus der Uhrbedingung abgeleiteten Bedingungen erfüllt sind.
-Wird eine Nachricht versendet, muss die lokale Lamportuhr inkrementiert werden. 
+Wird eine Nachricht versendet, muss die lokale Lamport-Uhr inkrementiert werden. 
 Daraus folgt, dass für zwei direkt aufeinander folgenden Sende-Ereignisse $e_i^x$ und $e_i^y$ wobei $e_i^x \rightarrow e_i^y$ gilt $C(e_i^x) < C(e_i^y)$, da bei Eintritt von $e_i^x$ die Uhr auf $a$ inkrementiert wurde und bei $e_i^y$ auf $a + 1$ erhöht werden musste.
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.80\textwidth]{LamportBeispiel.pdf}
-    \caption[Exemplarische Kommunikation mit Lamport Uhr]{Kommunikation zwischen drei Prozessen unter Verwendung von Lamportuhren.}
+    \caption[Exemplarische Kommunikation mit Lamport-Uhr]{Kommunikation zwischen drei Prozessen unter Verwendung von Lamport-Uhren.}
     Nachgezeichnet aus  \cite{landes2006dynamic}
     \label{fig:lamportBsp}
 \end{figure}
 
-Die zweite Bedingung fordert, dass für ein Sende-Ereignis $e_i^x$ die Uhr einen kleineren Wert als die des entsprechenden Empfangs-Ereignis $e_j^y$ besitzt.
+Die zweite Bedingung fordert, dass für ein Sendeereignis $e_i^x$ die Uhr einen kleineren Wert als die des entsprechenden Empfangsereignis $e_j^y$ besitzt.
 Durch die $\max$-Funktion wird zwischen der lokalen Uhr und der an die Nachricht angehängte Uhr entschieden.
 Hieraus entstehen zwei Fälle:
-Im ersten Fall ist der Zähler der lokalen Uhr größer als die der Nachricht, somit ist die Nachricht älter als der aktuelle Zustand und die lokale Uhr inkrementiert um Eins stellt den neuen Uhrenwert dar.
+Im ersten Fall ist der Zähler der lokalen Uhr größer als die der Nachricht.
+Somit ist die Nachricht älter als der aktuelle lokale Zustand und die lokale Uhr inkrementiert um Eins stellt den neuen Uhrenwert dar.
 Im zweiten Fall ist die Uhr der Nachricht größer als die lokale Uhr.
 Dem Empfänger sind also nicht alle Ereignisse des Sendeprozesses bekannt und hat somit einen älteren Stand.
 In diesem Fall wird die Uhr aus der Nachricht als neue Uhr übernommen und inkrementiert.
-In beiden Fällen gibt die Uhr für das Sende-Ereignis immer einen kleineren Wert als für das Empfangs-Ereignis an somit ist $C(e_i^x) < C(e_j^y)$ erfüllt.
+In beiden Fällen gibt die Uhr für das Sendeereignis immer einen kleineren Wert als für das Empfangsereignis an somit ist $C(e_i^x) < C(e_j^y)$ erfüllt.
 
-Lamportuhren haben jedoch einen entscheidenden Nachteil.
+Lamport-Uhren haben jedoch einen entscheidenden Nachteil.
 Mit ihnen können keine Unterbrechungen erkannt werden.
-Da dies jedoch die Grundlage für kausaler und FIFO-Zustellung ist, sind Lamportuhren nicht dafür geeignet diese zu garantieren.
-Der Grund hierfür ist, dass keine Information über den Zustand der anderen Prozesse gespeichert wird.
+Da dies jedoch die Grundlage für kausaler und FIFO-Zustellung ist, sind Lamport-Uhren nicht dafür geeignet diese zu garantieren.
+Der Grund hierfür ist, dass keine Information über den Zustand der anderen Prozesse gespeichert wird \cite{landes2006dynamic}.
 
 Haben zwei Ereignisse den selben Zählerstand müssen diese gleichzeitig aufgetreten sein.
 Ist also $C_i(e_i^x)=C_j(e_j^y)$ gegeben, folgt $e_i^x \parallel e_j^y$.
 Gilt jedoch $C_i(e_i^x)<C_j(e_j^y)$ ist es nicht möglich zu entscheiden ob $e_i^x \Rightarrow e_j^y$ oder $e_i^x \parallel e_j^y$ gilt.
-Die Uhr erlaubt es also nicht eine Aussage über die Reihenfolge der Ereignisse selbst zu machen.
+Die Uhr erlaubt es also nicht eine Aussage über die Reihenfolge der Ereignisse selbst zu machen \cite{landes2006dynamic}.
 
-Lamportuhren sind dazu geeignet eine totale Ordnung im System herzustellen.
+Lamport-Uhren sind jedoch dazu geeignet eine totale Ordnung im System herzustellen.
 Diese strikte Ordnung muss jedoch mit einer großen Anzahl an verschickten Nachrichten bezahlt werden, was wieder eine hohe Netzwerklast mit sich bringt.
 Es würde daher ausreichen, Ereignisse nach ihrem kausalen Zusammenhang zu ordnen.
 \fig{fig:LamportConcurrent} zeigt eine solche Situation, in der eine kausale Ordnung ausreichen würde, da das Empfangen von Nachricht $m_2$ nicht davon abhängt ob $m_2$ bereits empfangen wurde.
 Eine totale Ordnung würde jedoch dazu führen, dass $m_1$ und $m_2$ von jedem Prozess in der selben Reihenfolge empfangen werden.
-Ferner ist es nicht möglich ob das Versenden von $m_3$ vom Empfangen von $m_1$ oder $m_2$ abhängt \cite{Tanenbaum2007}.
+Ferner ist es nicht möglich ob das Versenden von $m_3$ vom Empfangen von $m_1$ oder $m_2$ abhängt \cite{Tanenbaum2007}[S. 249].
 
 \begin{figure}[ht]
     \centering
@@ -249,50 +252,50 @@ Ferner ist es nicht möglich ob das Versenden von $m_3$ vom Empfangen von $m_1$ 
     \label{fig:LamportConcurrent}
 \end{figure}
 
-Mit Lamportuhren können Ereignisse somit nach ihren kausalen Abhängigkeiten geordnet werden.
+Mit Lamport-Uhren können Ereignisse somit nach ihren kausalen Abhängigkeiten geordnet werden.
 Es kann jedoch keine Aussage über die Abhängigkeiten selbst getroffen werden.
 So kann zum Beispiel nicht entschieden werden ob zwei Ereignisse in der kausalen Ordnung vertauscht werden können ohne die kausale Konsistenz zu zerstören.
-Hierzu müssen zusätzliche Informationen über die restlichen Prozesse gespeichert werden.
+Hierzu müssen zusätzliche Informationen über die restlichen Prozesse gespeichert werden \cite{landes2006dynamic}.
 
 % negativ Beispiel in Plausible Clocks Constant Size Logical Clocks for Distributed Systems
 \subsubsection{Vektoruhren}
-Vektoruhren stellen eine Erweiterung der von Lamport vorgestellten Uhr dar und werden häufig eingesetzt um die Defizite der Lamportuhr zu beheben.
-Statt einem einzelnen skalaren Zeitstempel, verwenden Vektoruhren viele Zähler um die kausale Abhängigkeit zwischen Ereignisse umfänglicher zu erfassen, als dies mit Lamportuhren möglich wäre.
+Vektoruhren stellen eine Erweiterung der von Lamport vorgestellten Uhr dar und werden häufig eingesetzt um die Defizite der Lamport-Uhr zu beheben.
+Statt einem einzelnen skalaren Zeitstempel, verwenden Vektoruhren viele Zähler um die kausale Abhängigkeit zwischen Ereignisse umfänglicher zu erfassen, als dies mit Lamport-Uhren möglich wäre.
 Ihr Name wurde ihnen gegeben, da die Zeitstempel in einem Vektor zusammengefasst werden.
 Sie wurden zeitgleich von Mattern \cite{mattern1989virtual} und Fidge \cite{fidge1991logical, fidge1988timestamps} vorgeschlagen und analysiert.
 
-Wie bei Lamportuhren verwaltet jeder Prozess seine eigne lokale Uhr.
+Wie bei Lamport-Uhren verwaltet jeder Prozess seine eigne lokale Uhr.
 Die Uhr ist jedoch nun ein Vektor aus $n$ skalaren Werten, bei einem System bestehend aus $n$ Prozesse.
 Jede Komponente $VC_i(e_i^x)[j]$ entspricht dem letzten Uhrenwert den Prozess $i$ zu Prozess $j$ zum Zeitpunkt $e_i^x$ kennt.
 Folgende Regeln müssen bei der Aktualisierung der Uhr eingehalten werden:
 \begin{itemize}
-    \item Wenn $e_i^x$ das Empfang-Ereignis der Nachricht $m$ ist, dann $VC_i(e_i^x):=\max\{ VC_i(e_i^{x-1}), VC_j(e_j^y) \}$, wobei $VC_j(e_j^y)$ der Uhrenvektor des Sende-Ereignisses von Prozess $j$ ist, welcher die Nachricht $m$ an Prozess $i$ gesendet hat. Das Maximum wird komponentenweise bestimmt.
-    \item Wenn $e_i^x$ ein beliebiges Ereignis ist, dann muss der Prozess seine Vektorkomponente inkrementiert: $VC_i(e_i^x)[i]:=VC_i(e_i^{x-1})[i] + 1$. Dies beinhaltet auch Empfang-Ereignisse.
+    \item Wenn $e_i^x$ das Empfangsereignis der Nachricht $m$ ist, dann $VC_i(e_i^x):=\max\{ VC_i(e_i^{x-1}), VC_j(e_j^y) \}$, wobei $VC_j(e_j^y)$ der Uhrenvektor des Sendeereignisses von Prozess $j$ ist, welcher die Nachricht $m$ an Prozess $i$ gesendet hat. Das Maximum wird komponentenweise bestimmt.
+    \item Wenn $e_i^x$ ein beliebiges Ereignis ist, dann muss der Prozess seine Vektorkomponente inkrementiert: $VC_i(e_i^x)[i]:=VC_i(e_i^{x-1})[i] + 1$. Dies beinhaltet auch Empfangsereignisse.
 \end{itemize}
 
-\fig{fig:VektorBsp} zeigt den selben Kommunikationsverlauf wie \fig{fig:lamportBsp} jedoch mit der Verwendung von Vektoruhren statt Lamportuhren.
-Anschaulich betrachtet ist $\VCieix[i]$ gleich der Anzahl der von Prozess $i$ ausgeführten Ereignisse (inklusive $\eix$) zum Zeitpunkt von $\eix$ bereits ausgeführt hat.
+\fig{fig:VektorBsp} zeigt den selben Kommunikationsverlauf wie \fig{fig:lamportBsp} jedoch mit der Verwendung von Vektoruhren statt Lamport-Uhren.
+Anschaulich betrachtet ist $\VCieix[i]$ gleich der Anzahl der von Prozess $i$ bereits ausgeführten Ereignisse (inklusive $\eix$) zum Zeitpunkt von $\eix$.
 Nach der selben Logik gibt $\VCieix[j]$ die Anzahl der Ereignisse von Prozess $i$ an, die vor $\eix$ eingetreten sind.
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.80\textwidth]{VektorBeispiel.pdf}
-    \caption[Exemplarische Kommunikation mit Vektoruhren]{Kommunikation zwischen drei Prozessen unter Verwendung von Vektoruhren.}
+    \caption[Exemplarische Kommunikation mit Vektoruhren]{Kommunikation dreier Prozessen unter Verwendung von Vektoruhren.}
     Nachgezeichnet aus  \cite{landes2006dynamic}
     \label{fig:VektorBsp}
 \end{figure}
 
-Der große Vorteil von Vektoruhren ist, dass sie nicht nur die schwache Uhrenbedingung erfüllen sondern auch eine strengere Variation, nämlich die starke Uhrenbedingung \cite{Lamport1978}:
+Ein Vorteil von Vektoruhren ist, dass sie nicht nur die schwache Uhrenbedingung erfüllen sondern auch eine strengere Variation, nämlich die starke Uhrenbedingung \cite{Lamport1978}:
 \begin{equation*}
 \forall e_i^x, e_j^y \in E \colon VC(e_i^x) < VC(e_j^y) \text{ genau dann, wenn } e_i^x \Rightarrow e_j^y
 \end{equation*}
 
-Bei Lamportuhren, welche nur die schwache Uhrenbedingung erfüllen, ist die Aussage $C_i(e_i^x)<C_j(e_j^y)$ doppeldeutig. 
+Bei Lamport-Uhren, welche nur die schwache Uhrenbedingung erfüllen, ist die Aussage $C_i(e_i^x)<C_j(e_j^y)$ doppeldeutig. 
 Es kann nicht zwischen $e_i^x \Rightarrow e_j^y$ oder $e_i^x \parallel e_j^y$ unterschieden werden.
-Bei Uhren die jedoch die starke Uhrenbedingung erfüllen, wie Vektoruhren, lässt die selbe Aussage nur den Schluss zu, dass $e_i^x \Rightarrow e_j^y$ gelten muss.
-Somit wurde die Schwäche von Lamportuhren eliminiert.
+Bei Uhren die jedoch die starke Uhrenbedingung erfüllen, wie Vektoruhren, lässt die selbe Aussage nur den Schluss zu, dass $e_i^x \Rightarrow e_j^y$ gelten muss \cite{leon2013ereignisdiskrete}[S. 465].
+Somit wurde die Schwäche der Lamport-Uhr eliminiert.
 
-Damit die starke Uhrenbedingung von Vektoruhren erfüllt werden kann, muss zuerst die $<$-Relation von Vektoruhren definiert werden:
+Damit die starke Uhrenbedingung von Vektoruhren erfüllt werden kann, muss zuerst die $<$-Relation von Vektoruhren definiert werden \cite{mattern1989virtual}:
 \begin{align*}
 \VCieix &< \VCjejy \text{ genau dann, wenn} \\
        & \VCieix \ne \VCjejy \text{ und } \\
@@ -307,7 +310,7 @@ Nun kann anhand einer Vektoruhr entscheiden werden ob ein Ereignis kausal abhän
 Hervorzuheben ist, dass nur eine einzige skalare Operation notwendig ist, um diesen Zusammenhang zu erschließen.
 Ferner ist die obige Formel nicht symmetrisch.
 Wird sie angewendet und ergibt $\eix \centernot\Rightarrow \ejy$, muss sie ein zweites Mal angewendet werden um zwischen $\ejy \Rightarrow \eix$ oder $\eix \parallel \ejy$ zu entscheiden.
-Dies führt zu dem Nebenläufigkeitstest:
+Dies führt zu dem Nebenläufigkeitstest \cite{landes2006dynamic}:
 \begin{align*}
     \eix \parallel & \ejy \text{ genau dann, wenn } \\
                    & \VCjejy[i] \le \VCieix[i] \text{ und } \\
@@ -322,46 +325,55 @@ Zum einen muss die Anzahl der Prozesse konstant und zum anderen auch im Voraus b
 In dynamischen System stellen diese beiden Einschränkungen ein ernstes Problem dar, da die Anzahl in solchen System nicht einfach zu bestimmen ist, was in der Natur der Sache liegt \cite{landes2006dynamic}.
 
 \subsubsection{Interval Tree Clocks}
+\label{cap:itc}
 Vektoruhren haben den großen Nachteil für dynamischen Systeme eher ungeeignet zu sein.
 Daher ist es interessant entsprechende neue Verfahren zu untersuchen, welche die Defizite von Vektoruhren in einem solchen Kontext ausmerzen.
 Interval Tree Clocks (ITC) stellen ein solches Verfahren dar und wurden 2008 von \etal{Almeida} in ihrer Arbeit \qq{Interval Tree Clocks: A Logical Clock for Dynamic Systems} \cite{almeida2008treeclocks} vorgeschlagen.
 Wie bereits angedeutet, sind ITCs besonders für dynamische Systeme geeignet, in denen häufig Prozesse gestartet und terminiert werden.
 Während Vektoruhren eine globale ID benötigen, nämlich den Index der Vektorkomponente, kommen ITCs ohne solcher globalen eindeutigen IDs aus. Dies ermöglicht eine gänzlich dezentrale Erzeugung von Prozessen \cite{almeida2008treeclocks}.
 
-Interval Tree Clocks haben eine in der Größe variable Darstellung, welche sich automatisch an der Anzahl der existierenden Prozesse richtet. Die Größe der Uhren nimmt zu und ab entsprechend der im System aktiven Prozesse.
+Interval Tree Clocks haben eine in der Größe variable Darstellung, welche sich automatisch an der Anzahl der existierenden Prozesse richtet. Die Größe der Uhren nimmt zu und ab, entsprechend der im System aktiven Prozesse.
 Um dies zu erreichen setzten ITCs auf dem \qq{Fork-Event-Join}-Modell auf.
 Hierbei handelt es sich um ein Modell bei dem die Kausalität durch drei grundlegende Operationen beschrieben werden kann.
-Diese Operationen, fork, event und join, werden auf die Zeitstempel der Uhr angewendet.
-Bei ITCs besteht ein Zeitstempel aus dem Paar $(i,e)$ bestehend aus einer ID $i$ und der Ereigniskomponente $e$, welche die kausal bekannte Ereignisse enthält.
+Diese Operationen, \textit{fork}, \textit{event} und \textit{join}, werden auf die Zeitstempel der Uhr angewendet.
+Bei ITCs besteht ein Zeitstempel aus dem Paar $(i,e)$ bestehend aus einer ID $i$ und der Ereigniskomponente $e$, welche die kausal bekannte Ereignisse enthält \cite{almeida2008treeclocks}.
 
-Durch die fork-Operation kann die vergangenen kausale Zusammenhänge eines Zeitstempel geklont werden.
+Durch die fork Operation kann die vergangenen kausale Zusammenhänge eines Zeitstempel geklont werden.
 Dies führt dazu, dass zwei neue Paare entstehen mit der selben Ereigniskomponente, jedoch mit unterschiedlichen IDs.
-Neue Ereignisse können durch die event-Operation zu der Ereigniskomponente hinzugefügt werden. 
+Neue Ereignisse können durch die event Operation zu der Ereigniskomponente hinzugefügt werden. 
 Hierbei wird die partielle Ordnung der Ereignisse eingehalten.
-Mit der join-Operation kann ein neuer Zeitstempel durch Zusammenfassung zweier Stempel erzeugt werden.
+Mit der join Operation kann ein neuer Zeitstempel durch Zusammenfassung zweier Stempel erzeugt werden \cite{almeida2008treeclocks}.
 
-Mit diesen Basisoperationen lassen sich nun die klassischen Operationen send, receive und sync beschreiben.
-Eine send-Operation ist die atomare Verkettung von event und fork.
+Mit diesen Basisoperationen lassen sich nun die klassischen Operationen \textit{send}, \textit{receive} und \textit{sync} beschreiben.
+Eine send Operation ist die atomare Verkettung von event und fork.
 Bei Vektoruhren entspricht dies dem Inkrementieren des lokalen Zählers und dem erzeugen einer Nachricht.
 Receive wird ebenfalls durch die atomare Verkettung von join gefolgt von event beschrieben.
 Analog hierzu muss bei Vektoruhren das komponentenweise Maximum bestimmt werden und der lokale Zähler inkrementiert werden.
-Wieder durch eine atomare Verkettung kann die sync-Operation durch join und fork modelliert werden.
+Wieder durch eine atomare Verkettung kann die sync Operation durch join und fork modelliert werden \cite{almeida2008treeclocks}.
 
 Der Unterschied zwischen Vektoruhren und ITCs wird besonders deutlich, wenn die IDs als Funktion betrachtet werden.
-Während die global eindeutige IDs von Vektoruhren einer konstanten vordefinierten Funktion entspricht, wird die ID Komponente der ITCs entsprechend der Prozessanzahl modifiziert.
+Während die global eindeutigen IDs von Vektoruhren einer konstanten vordefinierten Funktion entsprechen, wird die ID Komponente der ITCs entsprechend der Prozessanzahl modifiziert.
 Während bei klassischen Verfahren diskrete Funktionen verwendet werden, basieren ITCs auf kontinuierliche Funktionen über die Menge $\mathbb{R}$, beschränkt auf das Intervall $[0;1[$.
 Dieser Bereich kann in eine beliebige Anzahl an Subintervallen geteilt werden.
 
 Die Idee hinter Interval Tree Clocks ist es nun jedem Prozess eine Menge von Intervalle zur Verfügung zustellen, welche verwendet werden können um die Ereigniskomponente zu erweitern.
-Diese werden bei einer fork-Operation an die beiden Nachfolger weitergegeben und bei einer join-Operation wieder zusammengeführt.
-Jedes Subintervall wird durch aufeinanderfolgend Teilungen des Intervalls $[0;1[$ in gleich große Intervalle erzeugt.
+Diese werden bei einer fork Operation an die beiden Nachfolger weitergegeben und bei einer join Operation wieder zusammengeführt.
+Jedes Subintervall wird durch aufeinanderfolgende Teilungen des Intervalls $[0;1[$ in gleich große Intervalle erzeugt.
 Diese Zusammenhänge lassen sich effizient als binärer Baum darstellen.
 \etal{Almeida} stellen eine geeignete binäre Kodierung der ITCs in ihrer Arbeit vor \cite{almeida2008treeclocks}.
 
-\fig{fig:itcBsp} zeigt die Veränderung der ITCs im Laufe der Zeit unter Verwendung des Fork-Join-Event-Modell.
-Die Kommunikation, im dargestellten Beispiel, beginnt mit einem Prozesse, welcher einen \qq{Seed}-Zeitstempel hält.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{ITCBeispiel.png}
+    \caption[Fork-Join-Event-Modell von Interval Tree Clocks]{Grafische Darstellung des Fork-Join-Event Modells bei Verwendung von Interval Tree Clocks in einem dynamischen System.}
+    Quelle: \cite{almeida2008treeclocks}
+    \label{fig:itcBsp}
+\end{figure} 
+
+\fig{fig:itcBsp} zeigt die Veränderung der ITCs im Laufe der Zeit unter Verwendung des Fork-Join-Event-Modells.
 ITCs lassen sich als Funktion beschreiben und somit plotten.
 Die in der Grafik zu sehende Rechtecke stellen die Graphen der ITCs Funktionen dar.
+Die im Beispiel dargestellten Kommunikation beginnt mit einem Prozesse, welcher einen \textit{seed} Zeitstempel hält.
 Dieser wird in zwei Uhren geteilt, es sind nun zwei Prozesse aktiv.
 Für einen der beide Prozesse wird ein Ereignis ausgelöst, für den Anderen zwei.
 Dies ist durch die Stapelung der Graphen angedeutet.
@@ -373,16 +385,4 @@ Interval Tree Clocks können somit effizienter in dynamische Systeme verwaltet w
 Sie wurden im Hinblick auf die häufige Erstellung und Terminierung von Prozessen, wie es in heutigen Systemen in der Regel der Fall ist, entwickelt.
 Dabei wird der dynamische Charakter solcher Systeme in der dynamischen Aufteilung der Intervalle der ITCs widergespiegelt.
 Fernen kann auf globale eindeutige IDs verzichtet werden, was im Allgemeinen eine große Vereinfachung des Systems darstellt.
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{ITCBeispiel.png}
-    \caption[Fork-Join-Event-Modell von Interval Tree Clocks]{Grafische Darstellung des Fork-Join-Event Modells bei Verwendung von Interval Tree Clocks in einem dynamischen System.}
-    Quelle: \cite{almeida2008treeclocks}
-    \label{fig:itcBsp}
-\end{figure} 
-
-
-
-
 
